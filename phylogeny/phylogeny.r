@@ -4,8 +4,13 @@ library("phyloseq")
 library("treeio")
 library("microbiome")
 
+# Set this to your current path
+thesis.path <- "/Users/ksb/repos/lab/danielle_thesis"
 
-setwd("/Users/danielle/Documents/thesis/phylogeny")
+phylo.path <- file.path(thesis.path, "phylogeny")
+taxa.path <- file.path(thesis.path, "analysis/taxa_difference.csv")
+
+setwd(phylo.path)
 
 
 # creating dataframe for phylogenetic tree metadata
