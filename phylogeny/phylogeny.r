@@ -4,12 +4,17 @@ library("phyloseq")
 library("treeio")
 library("microbiome")
 
+# Set this to your current path
+thesis.path <- "/Users/ksb/repos/lab/danielle_thesis"
 
-setwd("/Users/danielle/Documents/thesis/phylogeny")
+phylo.path <- file.path(thesis.path, "phylogeny")
+taxa.path <- file.path(thesis.path, "analysis/taxa_difference.csv")
+
+setwd(phylo.path)
 
 
 # creating dataframe for phylogenetic tree metadata
-taxa_diff <- read.csv("/Users/danielle/Documents/thesis/analysis/taxa_difference.csv")
+taxa_diff <- read.csv(taxa.path)
 tree <- taxa_diff
 tree$sequencing[!is.na(taxa_diff$mgx_avg_abund)] <- "mgx"
 tree$sequencing[!is.na(taxa_diff$amp_avg_abund)] <- "amp"
@@ -17,15 +22,26 @@ tree$sequencing[!is.na(taxa_diff$mgx_avg_abund)&!is.na(taxa_diff$amp_avg_abund) 
 tree <- tree[,c(2,7)]
 write.csv(tree,"phylogeny.csv")
 
-otu <- as.matrix(read.csv("phyloseq_otu.csv"))
-otu[,2:ncol(otu)] <- as.numeric(otu[,2:ncol(otu)])
-OTU = otu_table(otu, taxa_are_rows = TRUE)
+otu <- as.data.frame(read.csv("phyloseq_otu.csv"))
+# convert NA to 0
+otu[is.na(otu)] <- 0
+# find smallest non-zero number
+min.non0 <- min(otu[,-1][otu[,-1] > 0])
 
+# convert everything to ints
+otu[,-1] <- sapply(otu[,-1], function(x) {x * (1/min.non0)})
+otu.matrix = as.matrix(otu[-1])
+
+sd <- sample_data(otu)
+
+OTU <- otu_table(otu.matrix, taxa_are_rows=TRUE)
 
 phy <- read.tree("phyliptree.phy")
 metadata <- read.csv("phyloseq_metadata.csv")
 
-physeq1 = merge_phyloseq(otu, metadata)
+physeq1 = merge_phyloseq(OTU, metadata)
+# Works to here, but I'm unclear about whether the metadata got properly associated
+
 pseq1 <- read_phyloseq(otu, metadata, type = "simple")
 
 read_csv2phyloseq(
