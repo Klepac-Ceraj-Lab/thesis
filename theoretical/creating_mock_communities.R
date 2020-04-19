@@ -17,6 +17,8 @@ for (ii in 1:30) {
 mock["total"] <- rowSums(mock[,2:101], na.rm = TRUE)
 mock[is.na(mock)] <- 0
 mock["shannon"] <- diversity(mock[,2:101], index="shannon")
+df["evenness"] <- diversity(mock[,2:101], "simpson")
+df["richness"] <- apply(df[,2:101]>0,1,sum)
 mock["min_abund"] <- (1.0/mock["total"])
 
 

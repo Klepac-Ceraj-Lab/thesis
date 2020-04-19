@@ -5,7 +5,7 @@ library("treeio")
 library("microbiome")
 
 # Set this to your current path
-thesis.path <- "/Users/ksb/repos/lab/danielle_thesis"
+thesis.path <- "/Users/danielle/Documents/thesis/"
 
 phylo.path <- file.path(thesis.path, "phylogeny")
 taxa.path <- file.path(thesis.path, "analysis/taxa_difference.csv")
@@ -39,27 +39,12 @@ OTU <- otu_table(otu.matrix, taxa_are_rows=TRUE)
 phy <- read.tree("phyliptree.phy")
 metadata <- read.csv("phyloseq_metadata.csv")
 
-physeq1 = merge_phyloseq(OTU, metadata)
-# Works to here, but I'm unclear about whether the metadata got properly associated
-
-pseq1 <- read_phyloseq(otu, metadata, type = "simple")
-
-read_csv2phyloseq(
-  otu.file = otu,
-  metadata.file = metadata,
-  sep = ","
-)
-
-
+physeq1 = merge_phyloseq(OTU, metadata, phy)
 
 plot_tree(phy)
 plot_tree(physeq1, label.tips="taxa_names", color="sequencing.type") + coord_polar(theta="y")  + 
   geom_point(color="sequencing")
 
-
-phy <- read.newick("phyliptree.phy")
-full_join(phy, metadata, by="label")
-ggtree(beast_tree, aes(color=rate))
 
 
 
@@ -78,14 +63,17 @@ sampledata = sample_data(data.frame(
   stringsAsFactors=FALSE
 ))
 
-random_tree = rtree(ntaxa(physeq), rooted=TRUE, tip.label=taxa_names(physeq))
+taxmat = matrix(sample(letters, 70, replace = TRUE), nrow = nrow(otumat), ncol = 7)
+rownames(taxmat) <- rownames(otumat)
+colnames(taxmat) <- c("Domain", "Phylum", "Class", "Order", "Family", "Genus", "Species")
 
-physeq <- merge_phyloseq(OTU, sampledata)
+OTU = otu_table(otumat, taxa_are_rows = TRUE)
+TAX = tax_table(taxmat)
+
+random_tree = rtree(ntaxa(physeq), rooted=TRUE, tip.label=taxa_names(physeq))
+physeq = phyloseq(OTU, TAX)
+
+physeq1 = merge_phyloseq(OTU, sampledata, random_tree)
 
 plot_tree(physeq, color="sequencing.type", label.tips="taxa_names", ladderize="left", plot.margin=0.3)
 
-# playing with Global Patterns
-
-physeq = prune_taxa(taxa_names(GlobalPatterns)[1:50], GlobalPatterns)
-plot_tree(physeq)
-physeq <- merge_phyloseq(GlobalPatterns@otu_table, sampledata, random_tree)
