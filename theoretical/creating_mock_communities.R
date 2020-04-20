@@ -17,8 +17,8 @@ for (ii in 1:30) {
 mock["total"] <- rowSums(mock[,2:101], na.rm = TRUE)
 mock[is.na(mock)] <- 0
 mock["shannon"] <- diversity(mock[,2:101], index="shannon")
-df["evenness"] <- diversity(mock[,2:101], "simpson")
-df["richness"] <- apply(df[,2:101]>0,1,sum)
+mock["evenness"] <- diversity(mock[,2:101], "simpson")
+mock["richness"] <- apply(mock[,2:101]>0,1,sum)
 mock["min_abund"] <- (1.0/mock["total"])
 
 
@@ -47,12 +47,14 @@ plot1 <- plot + geom_point() +
 
 babies2 <- read.csv("/Users/danielle/Documents/thesis/theoretical/sorted_babies.csv")
 
+
 log_reads <- log(mock$reads)
 log_reads[is.infinite(log_reads)] <- NA
 
-model <- lm(log_reads ~ mock$shannon)
-exp(predict(model, babies2))
-babies2$read_predictions <- exp(babies2$shannon * 1.179 + 10.322) #unlog transformation
+model <- lm(log_reads ~ evenness + richness, data=mock)
+predict_data <-  data.frame(babies2$evenness,babies2$richness)
+predictions <- predict(model, predict_data)
+babies2$read_predictions <- exp(predictions) #unlog transformation
 
   
 plot2 <- plot + geom_smooth() +

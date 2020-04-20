@@ -10,8 +10,8 @@ babies <- read.csv("/Users/danielle/Documents/thesis/theoretical/shannon.csv")
 
 babies$AgeMonths <- babies$correctedAgeDays/30.0
 
-babies$dev_stage[babies$AgeMonths < 15] <- "less than 15 months"
-babies$dev_stage[babies$AgeMonths > 15 & babies$AgeMonths <30] <- "15 to 30 months"
+babies$dev_stage[babies$AgeMonths =< 15] <- "less than 15 months"
+babies$dev_stage[babies$AgeMonths > 15 & babies$AgeMonths =<30] <- "15 to 30 months"
 babies$dev_stage[babies$AgeMonths > 30] <- "older than 30 months"
 
 babies$color[babies$dev_stage=="less than 15 months"] <- "red"
