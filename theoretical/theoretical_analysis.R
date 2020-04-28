@@ -10,8 +10,8 @@ babies <- read.csv("/Users/danielle/Documents/thesis/theoretical/shannon.csv")
 
 babies$AgeMonths <- babies$correctedAgeDays/30.0
 
-babies$dev_stage[babies$AgeMonths =< 15] <- "less than 15 months"
-babies$dev_stage[babies$AgeMonths > 15 & babies$AgeMonths =<30] <- "15 to 30 months"
+babies$dev_stage[babies$AgeMonths <= 15] <- "less than 15 months"
+babies$dev_stage[babies$AgeMonths > 15 & babies$AgeMonths <= 30] <- "15 to 30 months"
 babies$dev_stage[babies$AgeMonths > 30] <- "older than 30 months"
 
 babies$color[babies$dev_stage=="less than 15 months"] <- "red"
@@ -31,7 +31,7 @@ shannon1 <- plot(log(babies$AgeMonths),babies$shannon,
 dev_stages <- c("less than 15 months", "15 to 30 months", "older than 30 months")
 colors <- c("red", "blue", "yellow")
 
-legend("topleft", legend = dev_stages, fill = colors, title = 'Developmental Stages')
+legend("bottomright", legend = dev_stages, fill = colors, title = 'Developmental Stages')
 
 # boxplots of Shannon diversity given developmental stage
 babies$dev_stage <- factor(babies$dev_stage, 
@@ -44,6 +44,12 @@ par(mfrow=c(1,2))
 shannon1
 shannon2
 
-mean(!is.na(babies[babies$dev_stage == "less than 15 months",]$shannon))
-mean(!is.na(babies[babies$dev_stage == "15 to 30 months",]$shannon))
-mean(!is.na(babies[babies$dev_stage == "older than 30 months",]$shannon))
+# calculating mean of shannon diversity for different developmental stages
+
+mean(babies[babies$dev_stage == "less than 15 months",]$shannon, na.rm=TRUE)
+mean(babies[babies$dev_stage == "15 to 30 months",]$shannon, na.rm=TRUE)
+mean(babies[babies$dev_stage == "older than 30 months",]$shannon, na.rm=TRUE)
+
+IQR(babies[babies$dev_stage == "less than 15 months",]$shannon, na.rm=TRUE)
+IQR(babies[babies$dev_stage == "15 to 30 months",]$shannon, na.rm=TRUE)
+IQR(babies[babies$dev_stage == "older than 30 months",]$shannon, na.rm=TRUE)

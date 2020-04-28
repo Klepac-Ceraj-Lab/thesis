@@ -48,7 +48,7 @@ hist(bugs_mgx$mgx_abund[bugs_mgx$mgx_abund!=0],
 all_taxa <- unique(abund$taxa)
 avg_absdiff <- aggregate(abund$abs_diff, by=list(abund$taxa), FUN = mean, na.rm=TRUE)
 
-taxa_order <- avg_diff[order(avg_absdiff$x, decreasing = TRUE),]
+taxa_order <- avg_absdiff[order(avg_absdiff$x, decreasing = TRUE),]
 top_taxa <- taxa_order[1:5,1] #taxa with largest differences between 16S and mgx
 largest_diff_df <- abund[abund$taxa %in% top_taxa,]
 
@@ -56,6 +56,9 @@ p2 <- ggplot(largest_diff_df, aes(x = taxa, y = abs_diff)) + geom_boxplot()
 p2 <- p2 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                panel.background = element_blank(), axis.line = element_line(colour = "black")) +
   ylab("absolute difference in relative abundance")
+
+# calculating mean absolute difference
+
 
 # plotting total difference in relative abundance by taxa
 
@@ -116,8 +119,6 @@ hist(abund$diff_weight,
      main=NULL,
      xlab= "differences")
 
-# identify bugs in tails
 
-# 
 
 
