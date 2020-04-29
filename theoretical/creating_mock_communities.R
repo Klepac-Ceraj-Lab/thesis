@@ -34,12 +34,11 @@ write.csv(mock, "mock_communities2_filled.csv" )
 
 plot<- ggplot(mock, aes(log(richness), evenness))
 
-plot1 <- plot + geom_point(aes(color = reads)) +
+plot1 <- plot + geom_point(aes(color = reads), size = 1.0) +
   scale_color_gradientn(colours = rainbow(6), labels= comma) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"),
-        legend.position=c(0.1, 0.85)) + 
-  geom_smooth(method='lm', formula= y~x)
+        legend.position=c(0.85, 0.25))
 
 plot1
 
@@ -54,29 +53,24 @@ babies2["richness"] <- apply(babies2[,6:134]>0,1,sum)
 # creating linear model
 log_reads <- log(mock$reads)
 log_reads[is.infinite(log_reads)] <- NA
-model <- lm(log_reads ~ evenness + richness, data=mock)
+model <- lm(log_reads ~ evenness + log(richness), data=mock)
 predict_data <-  babies2
 predictions <- predict(model, predict_data)
 babies2$read_predictions <- exp(predictions) #unlog transformation
-
-plot2 <- plot + geom_smooth() +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.background = element_blank(), axis.line = element_line(colour = "black"))+
-  xlab("Shannon Index") + ylab("estimated reads")
 
 babies2$dev_stage <- factor(babies2$dev_stage, levels = c("less than 15 months", "15 to 30 months", "older than 30 months"))
 
 
 # calculating mean sequencing depth for each age group
 
-plot3 <- ggplot(data=subset(babies2, !is.na(dev_stage)), aes(log(richness), evenness)) + 
-  geom_point(aes(color = dev_stage), alpha=0.3) +
+plot2 <- ggplot(data=subset(babies2, !is.na(dev_stage)), aes(log(richness), evenness))
+plot2<- plot2+ geom_point(aes(color = dev_stage), alpha=0.2) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"),
-        legend.position=c(0.15, 0.55))+
-  guides(color=guide_legend("age"))
-
-plot3
+        legend.position=c(0.15, 0.85)) +
+  guides(color=guide_legend("age")) + ylim(0, 1.0) + xlim(0,4)
   
-grid.arrange(plot1, plot3, nrow=2)
+plot2
+  
+grid.arrange(plot1, plot2, nrow=2)
 
