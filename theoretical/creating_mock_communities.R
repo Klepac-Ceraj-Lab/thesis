@@ -1,6 +1,7 @@
 library(vegan)
 library(ggplot2)
 library(gridExtra)
+library(scales)
 
 set.seed(3434)
 
@@ -29,34 +30,35 @@ mock["reads"] <- genome_length/(read_length*mock$min_abund)
 
 write.csv(mock, "mock_communities2_filled.csv" )
 
+##### Make plot of estimated reads ~ eveness + richness ######
 
-plot<- ggplot(mock, aes(shannon, reads)) 
+plot<- ggplot(mock, aes(log(richness), evenness))
 
-
-plot1 <- plot + geom_point() + 
-  geom_smooth(aes(color =as.factor(parameter)), se=FALSE) +
+plot1 <- plot + geom_point(aes(color = reads)) +
+  scale_color_gradientn(colours = rainbow(6), labels= comma) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"),
-        legend.position=c(0.22, 0.55)) +
-  geom_jitter() +
-  guides(color=guide_legend("sampling distribution parameters", ncol=2))+
-  labs(color=mock$parameter)+
-  xlab("Shannon Index") + ylab("estimated reads")
+        legend.position=c(0.1, 0.85)) + 
+  geom_smooth(method='lm', formula= y~x)
+
+plot1
 
 # adding on actual data points
 
-babies2 <- read.csv("/Users/danielle/Documents/thesis/theoretical/sorted_babies.csv")
+babies2 <- read.csv("/Users/danielle/Documents/thesis/theoretical/theoretical_babies_df.csv")
 
+babies2["shannon"] <- diversity(babies2[,6:134], index="shannon")
+babies2["evenness"] <- diversity(babies2[,6:134], "simpson")
+babies2["richness"] <- apply(babies2[,6:134]>0,1,sum)
 
+# creating linear model
 log_reads <- log(mock$reads)
 log_reads[is.infinite(log_reads)] <- NA
-
 model <- lm(log_reads ~ evenness + richness, data=mock)
-predict_data <-  data.frame(babies2$evenness,babies2$richness)
+predict_data <-  babies2
 predictions <- predict(model, predict_data)
 babies2$read_predictions <- exp(predictions) #unlog transformation
 
-  
 plot2 <- plot + geom_smooth() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"))+
@@ -67,23 +69,14 @@ babies2$dev_stage <- factor(babies2$dev_stage, levels = c("less than 15 months",
 
 # calculating mean sequencing depth for each age group
 
-babies3 <- babies2[!is.na(babies2$dev_stage),] # remove nas
-
-mean_less15 <- mean(babies3[babies3$dev_stage == "less than 15 months","read_predictions"])
-mean_15to30 <- mean(babies3[babies3$dev_stage == "15 to 30 months","read_predictions"])
-mean_greater30 <- mean(babies3[babies3$dev_stage == "older than 30 months","read_predictions"])
-
-plot3 <- ggplot(data=subset(babies2, !is.na(dev_stage)), aes(shannon, read_predictions)) + 
+plot3 <- ggplot(data=subset(babies2, !is.na(dev_stage)), aes(log(richness), evenness)) + 
   geom_point(aes(color = dev_stage), alpha=0.3) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"),
         legend.position=c(0.15, 0.55))+
-  guides(color=guide_legend("age")) +
-  xlab("Shannon Index") + ylab("estimated reads")+
-  geom_hline(yintercept = mean_less15, color="red", alpha=0.4)+
-  geom_hline(yintercept = mean_15to30, color="green", alpha=0.4)+
-  geom_hline(yintercept = mean_greater30, color="blue", alpha=0.4)
-  
+  guides(color=guide_legend("age"))
+
+plot3
   
 grid.arrange(plot1, plot3, nrow=2)
 
