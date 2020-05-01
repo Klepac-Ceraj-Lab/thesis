@@ -29,11 +29,11 @@ p1 <- p1 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_
 p1
 
 # shannon diversity for different ages based on profiling method
-mean(df[df$dev_stage == "less than 15 months" && df$method == "amp",]$shannon, na.rm=TRUE)
+mean(df[df$dev_stage == "less than 15 months",]$shannon, na.rm=TRUE)
 mean(df[df$dev_stage == "15 to 30 months",]$shannon, na.rm=TRUE)
 mean(df[df$dev_stage == "older than 30 months",]$shannon, na.rm=TRUE)
 
-# t-test
+# statistics
 
 df_stage1 <- df[df$dev_stage == "less than 15 months",]
 kruskal.test(as.numeric(df_stage1$shannon)~ df_stage1$method)
@@ -48,6 +48,9 @@ anova_dev_stage <- aov(as.numeric(df$shannon) ~ df$dev_stage)
 summary(anova_dev_stage)
 posthoc <- TukeyHSD(anova_dev_stage, 'df$dev_stage', conf.level=0.95)
 posthoc
+
+
+
 
 # bray curtis dissimilarity for samples
 
@@ -93,6 +96,13 @@ p2 <- ggplot(melt(bc_df), aes(variable, value)) + geom_boxplot(aes(fill=variable
     "16S & mgx, paired", "16S & mgx, unpaired"))
   
 p2
+
+# statistics
+
+ks.test(bc_df$mgx_bc_vec, bc_df$amp_bc_vec)
+
+# no significant difference between paired and unpaired samples
+ks.test(bc_df$paired_bc_vec, bc_df$unpaired_bc_vec) 
 
 # BC distance for kids of different ages
 
@@ -155,7 +165,7 @@ vec_list <- list(amp.15.vec, mgx.15.vec, amp.1530.vec, mgx.1530.vec,amp.over30.v
   
   
 bc_method_df <- data.frame(lapply(vec_list, "length<-", max(lengths(vec_list))))
-colnames(bc_method_df)<-c("amp, under 15", "mgx, over 15",
+colnames(bc_method_df)<-c("amp, under 15", "mgx, under 15",
                           "amp, 15-30", "mgx, 15-30",
                           "amp, over 30", "mgx, over 30")
 
@@ -178,3 +188,13 @@ grid.arrange(
                         c(3, 3,3))
 )  
 
+
+# statistics
+
+under_30 <- as.vector(as.matrix(bc_method_df[1:4]))
+over_30 <- as.vector(as.matrix(bc_method_df[5:6]))
+
+ks.test(under_30, over_30)
+
+mean(na.omit(under_30))
+mean(na.omit(over_30))
