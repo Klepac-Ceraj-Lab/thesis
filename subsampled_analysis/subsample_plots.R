@@ -78,6 +78,12 @@ p3
 
 # calculating statistics
 
-mean(!is.na(df[df$sampling_cat == "10,000",]$richness))
-mean(!is.na(babies[babies$dev_stage == "15 to 30 months",]$shannon))
-mean(!is.na(babies[babies$dev_stage == "older than 30 months",]$shannon))
+mean((df[df$sampling_cat == "10000.0" ,]$richness), na.rm = TRUE)
+IQR((df[df$sampling_cat == "10000.0" ,]$richness), na.rm = TRUE)
+mean((df[df$sampling_cat == "original depth",]$richness), na.rm = TRUE)
+IQR((df[df$sampling_cat == "original depth",]$richness), na.rm = TRUE)
+
+anova <- aov(df$richness~df$sampling_cat)
+summary(anova)
+posthoc <- TukeyHSD(anova,conf.level=0.95)
+posthoc

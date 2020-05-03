@@ -7,6 +7,8 @@ setwd("/Users/danielle/Documents/thesis/analysis")
 
 abund <- read.csv("taxa_abundance_comparison.csv")
 
+aeromonas_df <- (abund[abund["taxa"]== "Aeromonas"])
+
 # find bugs unique to each method
 bugs_16S <- unique(abund[(!is.na(abund$amplicon_abund)) & is.na(abund$mgx_abund),]) #159
 bugs_mgx <- unique(abund[(!is.na(abund$mgx_abund)) & is.na(abund$amplicon_abund),]) #59

@@ -63,8 +63,32 @@ babies2$dev_stage <- factor(babies2$dev_stage, levels = c("less than 15 months",
 
 # calculating mean sequencing depth for each age group
 
+mean.under15 <- mean(na.omit(babies2[babies2$dev_stage == "less than 15 months",]$read_predictions))
+var.under15 <- var(na.omit(babies2[babies2$dev_stage == "less than 15 months",]$read_predictions))
+c(mean.under15-1.96*sqrt(var.under15), mean.under15+1.96*sqrt(var.under15))
+
+mean.over15 <- mean(na.omit(babies2[babies2$dev_stage == "15 to 30 months" 
+                |babies2$dev_stage == "older than 30 months",]$read_predictions))
+var.over15 <- var(na.omit(babies2[babies2$dev_stage == "15 to 30 months" 
+                                 |babies2$dev_stage == "older than 30 months",]$read_predictions))
+c(mean.over15-1.96*sqrt(var.over15), mean.over15+1.96*sqrt(var.over15))
+
+mean(babies2[babies2$dev_stage == "older than 30 months",]$read_predictions)
+
+# boxplots
+par(mfrow=c(1,2))
+boxplot(read_predictions~dev_stage, babies2)
+boxplot(read_depth~dev_stage, babies2)
+
+# statistics
+aov <- aov(read_predictions~dev_stage, babies2)
+summary(aov)
+TukeyHSD(aov)
+
+# plotting read predictions
+
 plot2 <- ggplot(data=subset(babies2, !is.na(dev_stage)), aes(log(richness), evenness))
-plot2<- plot2+ geom_point(aes(color = dev_stage), alpha=0.2) +
+plot2<- plot2+ geom_point(aes(color = dev_stage), alpha=0.4) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"),
         legend.position=c(0.15, 0.85)) +
