@@ -36,7 +36,9 @@ mean(df[df$dev_stage == "older than 30 months",]$shannon, na.rm=TRUE)
 # statistics
 
 df_stage1 <- df[df$dev_stage == "less than 15 months",]
-kruskal.test(as.numeric(df_stage1$shannon)~ df_stage1$method)
+mean(df_stage1[df_stage1$method == "mgx", ]$shannon)
+mean(df_stage1[df_stage1$method == "amp", ]$shannon)
+t.test(as.numeric(df_stage1$shannon)~ df_stage1$method)
 
 df_stage2 <- df[df$dev_stage == "15 to 30 months",]
 kruskal.test(as.numeric(df_stage2$shannon) ~ df_stage2$method)
@@ -49,8 +51,24 @@ summary(anova_dev_stage)
 posthoc <- TukeyHSD(anova_dev_stage, 'df$dev_stage', conf.level=0.95)
 posthoc
 
+# number of kids in each age group
 
+nrow(df_stage1)
+nrow(df_stage2)
+nrow(df_stage3)
 
+nrow(df)
+
+# age statistics
+
+mean(df_stage1$AgeMonths)
+sqrt(var(df_stage1$AgeMonths))
+
+mean(df_stage2$AgeMonths)
+sqrt(var(df_stage2$AgeMonths))
+
+mean(df_stage3$AgeMonths)
+sqrt(var(df_stage3$AgeMonths))
 
 # bray curtis dissimilarity for samples
 

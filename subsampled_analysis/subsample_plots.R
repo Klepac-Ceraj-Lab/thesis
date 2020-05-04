@@ -12,6 +12,14 @@ df["shannon"] <- diversity(df[,8:95], "shannon")
 df["evenness"] <- diversity(df[,8:95], "simpson")
 df["richness"] <- apply(df[,8:95]>0,1,sum)
 
+# subsample children statistics
+
+mean(df[df$dev_stage == "less than 15 months",]$AgeMonths)
+nrow(df[df$dev_stage == "less than 15 months",])
+nrow(df[df$dev_stage == "15 to 30 months",])
+nrow(df[df$dev_stage == "older than 30 months",])
+
+
 plot1 <- ggplot(df, aes(richness, evenness)) + 
   geom_point(aes(shape=dev_stage, color = sampling_cat))+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
