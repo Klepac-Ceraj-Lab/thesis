@@ -24,7 +24,8 @@ df$dev_stage <- factor(df$dev_stage,
 p1 <- ggplot(df, aes(x = dev_stage, y = shannon)) + geom_boxplot(aes(colour = method))
 p1 <- p1 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                  panel.background = element_blank(), axis.line = element_line(colour = "black")) +
-  ylab("Shannon diversity")
+  ylab("Shannon diversity")+labs(title = "", tag = "A") + xlab("developmental stage") +
+  theme(legend.position = c(0.8, 0.2)) + theme(legend.title=element_blank())
 
 p1
 
@@ -70,6 +71,22 @@ sqrt(var(df_stage2$AgeMonths))
 mean(df_stage3$AgeMonths)
 sqrt(var(df_stage3$AgeMonths))
 
+
+give.n <- function(x){
+  return(c(y = mean(x), label = length(x)/2))
+}
+
+hist(df$AgeMonths)
+
+ageplot <- ggplot(df, aes(x=AgeMonths, color=dev_stage, fill = dev_stage)) + 
+  geom_histogram(alpha=0.5, binwidth = 10) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(legend.title = element_blank()) + ylab("Frequency") + xlab("Age (months)") +
+  labs(title = "", tag = "B")+ theme(legend.position = c(0.8, 0.8))
+
+ageplot
+
 # bray curtis dissimilarity for samples
 
 abund_table <- df[,6:307]
@@ -105,13 +122,14 @@ unpaired_bc_vec <- na.omit(as.vector(unpaired_bc))
 
 bc_df <- data.frame(mgx_bc_vec, amp_bc_vec, paired_bc_vec, unpaired_bc_vec)
 
-p2 <- ggplot(melt(bc_df), aes(variable, value)) + geom_boxplot(aes(fill=variable))+
+# for paper, add color to first two boxplots in figure
+p2 <- ggplot(melt(bc_df), aes(variable, value)) + geom_boxplot()+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black")) +
-  ylab("relative Bray Curtis distance") + xlab("between sample beta diversity")+
+  ylab("Bray Curtis dissimilarity") + xlab("between sample beta diversity")+
   theme(legend.position = "none")+
   scale_x_discrete(labels=c('mgx, all','16S, all', 
-    "16S & mgx, paired", "16S & mgx, unpaired"))
+    "16S & mgx, paired", "16S & mgx, unpaired"))+labs(title = "", tag = "C")
   
 p2
 
@@ -133,6 +151,10 @@ amp.15.matrix <- as.matrix(vegdist(amp.15.table, "bray", diag=FALSE,upper=FALSE)
 amp.15.matrix[amp.15.matrix == 0.0] <- NA
 amp.15.vec <- na.omit(as.vector(amp.15.matrix))
 amp.15.vec
+amp.15.df <- data.frame(amp.15.vec)
+colnames(amp.15.df)<-c("BC_dist")
+amp.15.df["method"] <- "amp"
+amp.15.df["dev_stage"] <- "less than 15 months"
   
 mgx_under15 <- df[df$dev_stage == "less than 15 months"
                                 & df$method == "mgx",]
@@ -142,7 +164,12 @@ mgx.15.matrix <- as.matrix(vegdist(mgx.15.table, "bray", diag=FALSE,upper=FALSE)
 mgx.15.matrix[mgx.15.matrix == 0.0] <- NA
 mgx.15.vec <- na.omit(as.vector(mgx.15.matrix))
 mgx.15.vec
-  
+mgx.15.df <- data.frame(mgx.15.vec)
+colnames(mgx.15.df)<-c("BC_dist")
+mgx.15.df["method"] <- "mgx"
+mgx.15.df["dev_stage"] <- "less than 15 months"
+
+
 amp_15to30 <- df[df$dev_stage == "15 to 30 months"
                 & df$method == "amp",]
 amp.1530.table <- amp_15to30[,6:307]
@@ -151,6 +178,10 @@ amp.1530.matrix <- as.matrix(vegdist(amp.1530.table, "bray", diag=FALSE,upper=FA
 amp.1530.matrix[amp.1530.matrix == 0.0] <- NA
 amp.1530.vec <- na.omit(as.vector(amp.1530.matrix))
 amp.1530.vec
+amp.1530.df <- data.frame(amp.1530.vec)
+colnames(amp.1530.df)<-c("BC_dist")
+amp.1530.df["method"] <- "amp"
+amp.1530.df["dev_stage"] <- "15 to 30 months"
 
 mgx_15to30 <- df[df$dev_stage == "15 to 30 months"
                  & df$method == "mgx",]
@@ -160,6 +191,10 @@ mgx.1530.matrix <- as.matrix(vegdist(mgx.1530.table, "bray", diag=FALSE,upper=FA
 mgx.1530.matrix[mgx.1530.matrix == 0.0] <- NA
 mgx.1530.vec <- na.omit(as.vector(mgx.1530.matrix))
 mgx.1530.vec
+mgx.1530.df <- data.frame(mgx.1530.vec)
+colnames(mgx.1530.df)<-c("BC_dist")
+mgx.1530.df["method"] <- "mgx"
+mgx.1530.df["dev_stage"] <- "15 to 30 months"
   
 amp_over30 <-df[df$dev_stage == "older than 30 months"
                 & df$method == "amp",]
@@ -169,6 +204,11 @@ amp.over30.matrix <- as.matrix(vegdist(amp.over30.table, "bray", diag=FALSE,uppe
 amp.over30.matrix[amp.over30.matrix == 0.0] <- NA
 amp.over30.vec <- na.omit(as.vector(amp.over30.matrix))
 amp.over30.vec
+amp.over30.df <- data.frame(amp.over30.vec)
+colnames(amp.over30.df)<-c("BC_dist")
+amp.over30.df["method"] <- "amp"
+amp.over30.df["dev_stage"] <- "older than 30 months"
+
   
 mgx_over30 <- df[df$dev_stage == "older than 30 months"
                  & df$method == "mgx",]
@@ -178,23 +218,25 @@ mgx.over30.matrix <- as.matrix(vegdist(mgx.over30.table, "bray", diag=FALSE,uppe
 mgx.over30.matrix[mgx.over30.matrix == 0.0] <- NA
 mgx.over30.vec <- na.omit(as.vector(mgx.over30.matrix))
 mgx.over30.vec
-
-vec_list <- list(amp.15.vec, mgx.15.vec, amp.1530.vec, mgx.1530.vec,amp.over30.vec, mgx.over30.vec )
+mgx.over30.df <- data.frame(mgx.over30.vec)
+colnames(mgx.over30.df)<-c("BC_dist")
+mgx.over30.df["method"] <- "mgx"
+mgx.over30.df["dev_stage"] <- "older than 30 months"
   
-  
-bc_method_df <- data.frame(lapply(vec_list, "length<-", max(lengths(vec_list))))
-colnames(bc_method_df)<-c("amp, under 15", "mgx, under 15",
-                          "amp, 15-30", "mgx, 15-30",
-                          "amp, over 30", "mgx, over 30")
 
-p3 <- ggplot(melt(bc_method_df), aes(variable, value)) + geom_boxplot(aes(fill=variable))+
+bc_method_df <- rbind(amp.15.df, mgx.15.df, amp.1530.df, mgx.1530.df, amp.over30.df, mgx.over30.df)
+
+bc_method_df$dev_stage <- factor(bc_method_df$dev_stage,
+                       levels = c("less than 15 months", 
+                                  "15 to 30 months", 
+                                  "older than 30 months"),ordered = TRUE)
+
+p3 <- ggplot(bc_method_df, aes(x = dev_stage, y = BC_dist)) + geom_boxplot(aes(colour = method))+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black")) +
-  ylab("relative Bray Curtis distance") + xlab("beta diversity")+
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank())
-
+  ylab("Bray Curtis dissimilarity") + xlab("developmental stage")+
+  labs(title = "", tag = "B")+
+  theme(legend.position = "none")
 p3
 
 gl <- list(p1, p3, p2)
@@ -205,14 +247,17 @@ grid.arrange(
   layout_matrix = rbind(c(1,2, 2),
                         c(3, 3,3))
 )  
-
+# figure for thesis defense
+grid.arrange(
+  grobs =gl, 
+  layout_matrix = rbind(c(1,2,3)))
 
 # statistics
 
 under_30 <- as.vector(as.matrix(bc_method_df[1:4]))
 over_30 <- as.vector(as.matrix(bc_method_df[5:6]))
 
-ks.test(under_30, over_30)
+t.test(under_30, over_30)
 
 mean(na.omit(under_30))
 mean(na.omit(over_30))

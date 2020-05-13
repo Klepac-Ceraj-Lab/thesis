@@ -2,12 +2,14 @@ library(ggplot2)
 library(gridExtra)
 library(formattable)
 library(phyloseq)
+library(plyr)
+library(ggpubr)
 
 setwd("/Users/danielle/Documents/thesis/analysis")
 
 abund <- read.csv("taxa_abundance_comparison.csv")
 
-aeromonas_df <- (abund[abund["taxa"]== "Aeromonas"])
+# aeromonas_df <- (abund[abund["taxa"]== "Aeromonas"])
 
 # find bugs unique to each method
 bugs_16S <- unique(abund[(!is.na(abund$amplicon_abund)) & is.na(abund$mgx_abund),]) #159
@@ -22,15 +24,30 @@ unique_mgx <- bugs_mgx$taxa
 filtered_abund <- abund[abund$taxa %in% bugs_16S | abund$taxa %in% bugs_mgx, ]
 
 # plotting average relative abundance of bugs unique to each sample
-boxplot(log(bugs_16S$amplicon_abund[bugs_16S$amplicon_abund!=0]), 
-        log(bugs_mgx$mgx_abund[bugs_mgx$mgx_abund!=0]),
-        names = c("16S rRNA", "shotgun metagenomics"),
-        xlab="sequencing method",
-        ylab="log(relative abundance)")
+
+bugs_16S_df <- bugs_16S[,c("taxa","amplicon_abund")]
+bugs_16S_df["method"] <- "amp"
+bugs_16S_df <- rename(bugs_16S_df, c("amplicon_abund"="abund"))
+
+bugs_mgx_df <- bugs_mgx[,c("taxa","mgx_abund")] 
+bugs_mgx_df["method"] <- "mgx"
+bugs_mgx_df <- rename(bugs_mgx_df, c("mgx_abund"="abund"))
+
+unique_bugs_abund <- rbind(bugs_16S_df, bugs_mgx_df)
+
+p1 <- ggplot(unique_bugs_abund, aes(x = method, y = log(abund))) + geom_boxplot()
+
+p1 <- p1 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                 panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  ylab("log(relative abundance)") + xlab("profiling method") +
+  theme(text = element_text(size=20)) +
+  stat_compare_means(method = "t.test", label = "p.signif", label.x = 2, label.y = 1)
+
+p1
 
 mean((bugs_16S$amplicon_abund[bugs_16S$amplicon_abund!=0]))
 mean((bugs_mgx$mgx_abund[bugs_mgx$mgx_abund!=0]))
-t.test(log(bugs_16S$amplicon_abund[bugs_16S$amplicon_abund!=0]), log(bugs_mgx$mgx_abund[bugs_mgx$mgx_abund!=0]))
+t.test(abund~ method, data = unique_bugs_abund)
 ks.test(bugs_16S$amplicon_abund[bugs_16S$amplicon_abund!=0], bugs_mgx$mgx_abund[bugs_mgx$mgx_abund!=0])
 
 # histograms of the distribution of relative abundances of bugs unique to each sample
@@ -57,9 +74,9 @@ largest_diff_df <- abund[abund$taxa %in% top_taxa,]
 p2 <- ggplot(largest_diff_df, aes(x = taxa, y = abs_diff)) + geom_boxplot()
 p2 <- p2 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                panel.background = element_blank(), axis.line = element_line(colour = "black")) +
-  ylab("absolute difference in relative abundance")
+  ylab("absolute difference in relative abundance")+
+  labs(title = "", tag = "A")
 
-# calculating mean absolute difference
 
 
 # plotting total difference in relative abundance by taxa
@@ -72,8 +89,10 @@ largest_totaldiff_df <- abund[abund$taxa %in% top_taxa_totaldiff,]
 p3 <- ggplot(largest_totaldiff_df, aes(x = taxa, y = tot_diff)) + geom_boxplot()
 p3 <- p3 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
            panel.background = element_blank(), axis.line = element_line(colour = "black")) +
-  ylab("total difference in relative abundance")
-
+  ylab("total difference in relative abundance")+
+  labs(title = "", tag = "B")+
+  geom_hline(yintercept=0, linetype="dashed", color = "red")
+p3
 grid.arrange(p2, p3, ncol = 2)
 
 # calculating times difference was positive or negative
@@ -98,9 +117,13 @@ hist(ratio_df$"ratio: mgx/16S")
 
 # making tables of the bugs with highest ratio of 16S or mgx
 
-formattable(ratio_df[order(ratio_df$"ratio: 16S/mgx", decreasing = TRUE),][1:15,c(1:4)])
-formattable(ratio_df[order(ratio_df$"ratio: mgx/16S", decreasing = TRUE),][1:15,c(1,2,3,5)])
+ratiodf1 <- (ratio_df[order(ratio_df$"ratio: 16S/mgx", decreasing = TRUE),][1:20,c(1:4)])
+ratiodf1[ratiodf1==Inf]<-NA
+formattable(ratiodf1)
 
+ratiodf2 <- formattable(ratio_df[order(ratio_df$"ratio: mgx/16S", decreasing = TRUE),][1:20,c(1,2,3,5)])
+ratiodf2[ratiodf2==Inf]<-NA
+formattable(ratiodf2)
 
 # calculating percentage of bugs present uniquely in mgx, 16S, or both by sample
 

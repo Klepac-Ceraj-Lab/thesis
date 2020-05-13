@@ -2,6 +2,8 @@ library(vegan)
 library(ggplot2)
 library(gridExtra)
 library(scales)
+library(reshape2)
+library(RColorBrewer)
 
 set.seed(3434)
 
@@ -30,6 +32,12 @@ mock["reads"] <- genome_length/(read_length*mock$min_abund)
 
 write.csv(mock, "mock_communities2_filled.csv" )
 
+# mean richness for different sequencing depths
+
+mean(mock[mock$reads <= 10000,]$richness)
+mean(mock[mock$reads <= 100000,]$richness)
+mean(mock[mock$reads <= 1000000,]$richness)
+
 ##### Make plot of estimated reads ~ eveness + richness ######
 
 plot<- ggplot(mock, aes(log(richness), evenness))
@@ -38,7 +46,10 @@ plot1 <- plot + geom_point(aes(color = reads), size = 1.0) +
   scale_color_gradientn(colours = rainbow(6), labels= comma) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"),
-        legend.position=c(0.85, 0.25))
+        legend.position=c(0.85, 0.5))+
+  labs(title = "", tag = "A")+
+  stat_compare_means(method = "t.test", label = "p.signif", label.x = 2, label.y = 1)+
+  xlim(0,5)
 
 plot1
 
@@ -76,9 +87,26 @@ c(mean.over15-1.96*sqrt(var.over15), mean.over15+1.96*sqrt(var.over15))
 mean(babies2[babies2$dev_stage == "older than 30 months",]$read_predictions)
 
 # boxplots
-par(mfrow=c(1,2))
-boxplot(read_predictions~dev_stage, babies2)
-boxplot(read_depth~dev_stage, babies2)
+babies3 <- subset(babies2, select=c("sampleid", "dev_stage", "read_predictions"))
+colnames(babies3)[3] <- "predicted necessary depth"
+babies3 <- melt(babies3)
+
+babies4 <- subset(babies2, select=c("sampleid", "dev_stage", "read_depth"))
+colnames(babies4)[3] <- "sequenced depth"
+babies4 <- melt(babies4)
+
+babies5 <- rbind(babies3, babies4)
+
+
+p3 <- ggplot(na.omit(babies5), aes(x = dev_stage, y = value)) + 
+  geom_boxplot(aes(colour = variable))+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  ylab("read depth") + xlab("developmental stage")+
+  labs(title = "", tag = "C")+ theme(legend.title = element_blank()) +
+  theme(legend.position = c(0.25, 0.85)) +
+  scale_fill_manual(values = c("#E7B800", "#FC4E07"))
+p3
 
 # statistics
 aov <- aov(read_predictions~dev_stage, babies2)
@@ -87,14 +115,27 @@ TukeyHSD(aov)
 
 # plotting read predictions
 
+babies2$dev_stage <- factor(babies2$dev_stage,
+                                 levels = c("less than 15 months", 
+                                            "15 to 30 months", 
+                                            "older than 30 months"),ordered = TRUE)
+
 plot2 <- ggplot(data=subset(babies2, !is.na(dev_stage)), aes(log(richness), evenness))
 plot2<- plot2+ geom_point(aes(color = dev_stage), alpha=0.4) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"),
-        legend.position=c(0.15, 0.85)) +
-  guides(color=guide_legend("age")) + ylim(0, 1.0) + xlim(0,4)
+        legend.position=c(0.25, 0.85)) +
+  guides(color=guide_legend("age")) + ylim(0, 1.0) + xlim(0,5)+
+  labs(title = "", tag = "B")
+
+gl <- list(plot1, p3, plot2)
+
+grid.arrange(
+  grobs = gl,
+  widths = c(2, 1, 1),
+  layout_matrix = rbind(c(1,2, 2),
+                        c(3, 2,2))
+)  
   
-plot2
-  
-grid.arrange(plot1, plot2, nrow=2)
+
 
