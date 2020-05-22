@@ -4,6 +4,7 @@ library(gridExtra)
 library(scales)
 library(reshape2)
 library(RColorBrewer)
+library(scales)
 
 set.seed(3434)
 
@@ -105,6 +106,7 @@ p3 <- ggplot(na.omit(babies5), aes(x = dev_stage, y = value)) +
   ylab("read depth") + xlab("developmental stage")+
   labs(title = "", tag = "C")+ theme(legend.title = element_blank()) +
   theme(legend.position = c(0.25, 0.85)) +
+  scale_y_continuous(label=comma)+
   scale_fill_manual(values = c("#E7B800", "#FC4E07"))
 p3
 

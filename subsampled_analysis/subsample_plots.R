@@ -29,6 +29,10 @@ plot0 <- ggplot(df, aes(sampling_cat, shannon)) +
   labs(title = "", tag = "A")
 plot0
 
+df$dev_stage <- factor(df$dev_stage,
+                            levels = c("less than 15 months", 
+                                       "15 to 30 months", 
+                                       "older than 30 months"),ordered = TRUE)
 
 plot1 <- ggplot(df, aes(richness, evenness)) + 
   geom_point(aes(shape=dev_stage, color = sampling_cat))+

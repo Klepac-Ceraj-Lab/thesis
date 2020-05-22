@@ -144,6 +144,8 @@ hist(abund$diff_weight,
      main=NULL,
      xlab= "differences")
 
+# find bugs with highest relative abundance in younger kids in each profiling method
+
 
 
 

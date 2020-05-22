@@ -26,7 +26,6 @@ p1 <- p1 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_
                  panel.background = element_blank(), axis.line = element_line(colour = "black")) +
   ylab("Shannon diversity")+labs(title = "", tag = "A") + xlab("developmental stage") +
   theme(legend.position = c(0.8, 0.2)) + theme(legend.title=element_blank())
-
 p1
 
 # shannon diversity for different ages based on profiling method
@@ -34,58 +33,6 @@ mean(df[df$dev_stage == "less than 15 months",]$shannon, na.rm=TRUE)
 mean(df[df$dev_stage == "15 to 30 months",]$shannon, na.rm=TRUE)
 mean(df[df$dev_stage == "older than 30 months",]$shannon, na.rm=TRUE)
 
-# statistics
-
-df_stage1 <- df[df$dev_stage == "less than 15 months",]
-mean(df_stage1[df_stage1$method == "mgx", ]$shannon)
-mean(df_stage1[df_stage1$method == "amp", ]$shannon)
-t.test(as.numeric(df_stage1$shannon)~ df_stage1$method)
-
-df_stage2 <- df[df$dev_stage == "15 to 30 months",]
-kruskal.test(as.numeric(df_stage2$shannon) ~ df_stage2$method)
-
-df_stage3 <- df[df$dev_stage == "older than 30 months",]
-kruskal.test(as.numeric(df_stage3$shannon) ~ df_stage3$method)
-
-anova_dev_stage <- aov(as.numeric(df$shannon) ~ df$dev_stage)
-summary(anova_dev_stage)
-posthoc <- TukeyHSD(anova_dev_stage, 'df$dev_stage', conf.level=0.95)
-posthoc
-
-# number of kids in each age group
-
-nrow(df_stage1)
-nrow(df_stage2)
-nrow(df_stage3)
-
-nrow(df)
-
-# age statistics
-
-mean(df_stage1$AgeMonths)
-sqrt(var(df_stage1$AgeMonths))
-
-mean(df_stage2$AgeMonths)
-sqrt(var(df_stage2$AgeMonths))
-
-mean(df_stage3$AgeMonths)
-sqrt(var(df_stage3$AgeMonths))
-
-
-give.n <- function(x){
-  return(c(y = mean(x), label = length(x)/2))
-}
-
-hist(df$AgeMonths)
-
-ageplot <- ggplot(df, aes(x=AgeMonths, color=dev_stage, fill = dev_stage)) + 
-  geom_histogram(alpha=0.5, binwidth = 10) +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
-  theme(legend.title = element_blank()) + ylab("Frequency") + xlab("Age (months)") +
-  labs(title = "", tag = "B")+ theme(legend.position = c(0.8, 0.8))
-
-ageplot
 
 # bray curtis dissimilarity for samples
 
