@@ -67,7 +67,7 @@ unpaired_bc <- diag.remove(bc_matrix[1:99, 100:198], remove.val=NA)
 unpaired_bc[lower.tri(unpaired_bc)] <- NA
 unpaired_bc_vec <- na.omit(as.vector(unpaired_bc))
 
-bc_df <- data.frame(mgx_bc_vec, amp_bc_vec, paired_bc_vec, unpaired_bc_vec)
+bc_df <- data.frame(paired_bc_vec, unpaired_bc_vec)
 
 # for paper, add color to first two boxplots in figure
 p2 <- ggplot(melt(bc_df), aes(variable, value)) + geom_boxplot()+
@@ -75,8 +75,7 @@ p2 <- ggplot(melt(bc_df), aes(variable, value)) + geom_boxplot()+
         panel.background = element_blank(), axis.line = element_line(colour = "black")) +
   ylab("Bray Curtis dissimilarity") + xlab("between sample beta diversity")+
   theme(legend.position = "none")+
-  scale_x_discrete(labels=c('mgx, all','16S, all', 
-    "16S & mgx, paired", "16S & mgx, unpaired"))+labs(title = "", tag = "C")
+  scale_x_discrete(labels=c("16S & mgx, paired", "16S & mgx, unpaired"))+labs(title = "", tag = "C")
   
 p2
 

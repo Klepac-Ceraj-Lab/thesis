@@ -68,12 +68,31 @@ abund_table <- df[,8:97]
 abund_table<-subset(abund_table,rowSums(abund_table)!=0)
 meta_table <- subset(df,rowSums(df[,8:97])!=0)[,2:7]
 
-sol<-cca(abund_table ~ ., data=meta_table)
+sol<-rda(abund_table ~ ., data=meta_table)
 scrs<-scores(sol,display=c("sp","wa","lc","bp","cn"))
 df_sites<-data.frame(scrs$sites,meta_table$sampleid, meta_table$sampling_cat, meta_table$dev_stage)
 colnames(df_sites)<-c("x,","y","sampleid", "sampling_cat", "dev_stage")
 
+# finding main axes
+axis.expl <- function(mod, axes = 1:2) {
+  
+  if(is.null(mod$CCA)) {
+    sapply(axes, function(i) {
+      100*mod$CA$eig[i]/mod$tot.chi
+    })
+  } else {
+    sapply(axes, function(i) {
+      100*mod$CCA$eig[i]/mod$tot.chi
+    })
+  }
+  
+}
+
+axis.expl(sol)
+
 # coloring by dev stage and sampling depth
+
+
 
 df_sites$dev_stage <- factor(df_sites$dev_stage,
                             levels = c("less than 15 months", 
@@ -85,7 +104,7 @@ p1<-ggplot(df_sites, aes(df_sites$x, df_sites$y, colour=sampling_cat, shape = de
   geom_point()+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"))+
-  labs(x="Axis 1, 14.22%", y="Axis 2, 11.79%", 
+  labs(x="RDA 1, 37.01%", y="RDA 2, 21.67%", 
                   color="sampling depth", shape = "developmental stage")+ 
   theme(legend.position = "none")+
   labs(title = "", tag = "B")

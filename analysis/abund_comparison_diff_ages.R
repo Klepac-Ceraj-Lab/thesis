@@ -3,10 +3,15 @@ library(ggplot2)
 library(gridExtra)
 library(dplyr)
 library(phyloseq)
+library(reshape2)
+
 
 setwd("/Users/danielle/Documents/thesis/analysis")
 
 df <- read.csv("transposed_mgxamp_df.csv", header=TRUE)
+
+df$Escherichia_combined = sum(df$Escherichia, df$Escherichia.Shigella)
+df <- subset(df, select = -c(Escherichia,Escherichia.Shigella ))
 
 df$dev_stage[df$AgeMonths <= 15] <- "less than 15 months"
 df$dev_stage[df$AgeMonths > 15 & df$AgeMonths <= 30] <- "15 to 30 months"
@@ -19,12 +24,12 @@ df$dev_stage <- factor(df$dev_stage,
 
 df_stage12 <- df[df$dev_stage == "less than 15 months" | df$dev_stage ==  "15 to 30 months",]
 
-df_mgx <- df_stage12[df_stage12$method == "mgx",6:307]
+df_mgx <- df_stage12[df_stage12$method == "mgx",6:306]
 df_mgx_na <- Filter(function(x)!all(!is.na(x)), df_mgx)
 
 df_stage1_mgx_not1 <- df_mgx[colMeans(df_mgx, na.rm = TRUE)>0,]
 
-df_stage1_amp <- df[df$dev_stage == "less than 15 months" & df$method == "amp",6:307]
+df_stage1_amp <- df[df$dev_stage == "less than 15 months" & df$method == "amp",6:306]
 df_stage1_amp_not0 <- df_stage1_amp[df_stage1_amp.columns[df_stage1_amp.mean(axis=0) > 0.2]]
 df_stage1_amp_na <- Filter(function(x)!all(!is.na(x)), df_stage1_amp)
 
@@ -35,7 +40,7 @@ bugs_mgx <- unique(df[(!is.na(abund$mgx_abund)) & is.na(df$amplicon_abund),])
 
 meta_table <- df_stage12[1:38,c(3,5)]
 
-abund_table <- df_stage12[,6:307]
+abund_table <- df_stage12[,6:306]
 abund_table[is.na(abund_table)] <- 0
 
 

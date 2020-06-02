@@ -24,7 +24,7 @@ meta_table$dev_stage[meta_table$AgeMonths > 15 & meta_table$AgeMonths <= 30] <- 
 meta_table$dev_stage[meta_table$AgeMonths > 30] <- "older than 30 months"
 
 
-sol<-cca(abund_table ~ ., data=meta_table)
+sol<-rda(abund_table ~ ., data=meta_table)
 scrs<-scores(sol,display=c("sp","wa","lc","bp","cn"))
 df_sites<-data.frame(scrs$sites,meta_table$sampleid, meta_table$method, meta_table$dev_stage)
 colnames(df_sites)<-c("x","y","sampleid", "method", "dev_stage")
@@ -35,25 +35,42 @@ df_sites$dev_stage <- factor(df_sites$dev_stage,
                                           "older than 30 months"),ordered = TRUE)
 
 # finding main axes
+axis.expl <- function(mod, axes = 1:2) {
+  
+  if(is.null(mod$CCA)) {
+    sapply(axes, function(i) {
+      100*mod$CA$eig[i]/mod$tot.chi
+    })
+  } else {
+    sapply(axes, function(i) {
+      100*mod$CCA$eig[i]/mod$tot.chi
+    })
+  }
+  
+}
 
+axis.expl(sol)
 
 
 # coloring by sampling depth
 p1 <- ggplot(data = df_sites, aes(x,y,colour=dev_stage, shape = method, group = sampleid))
-#p1 <- p1+geom_point(aes(colour=dev_stage, shape = method, group = sampleid), size = 3, alpha = 0.7) +
-#  theme_bw()+labs(x="Axis 1, 9.775% ", y="Axis 2, 8.815%", color="developmental stage", shape = "profiling method")+
-#  xlim(-1.5, 0.5) + ylim(-1.5, 3)+ theme_bw() + 
-#  theme(panel.border = element_blank(), panel.grid.major = element_blank(),
-#panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
-#axis.text.x = element_blank(), axis.text.y = element_blank())
+p1 <- p1+geom_point(aes(colour=dev_stage, shape = method, group = sampleid), size = 3, alpha = 0.7) + geom_line() +
+theme_bw()+labs(x="RDA 1, 45.90% ", y="RDA 2, 19.22%", color="developmental stage", shape = "profiling method")+
+theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
+axis.text.x = element_blank(), axis.text.y = element_blank()) 
 
-
-p1 <- p1+geom_point(size = 3, alpha = 0.7) + geom_line() +
-  labs(x="Axis 1, 9.775% ", y="Axis 2, 8.815%", color="developmental stage", shape = "profiling method")+
-  theme_bw() + 
-  theme(panel.border = element_blank(), panel.grid.major = element_blank(),
-       panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))
 p1
+
+multiplier <- vegan:::ordiArrowMul(scrs$biplot)
+df_arrows<- scrs$biplot*multiplier
+
+#p1 <- p1+geom_point(size = 3, alpha = 0.7) + geom_line() +
+  #labs(x="Axis 1, 9.775% ", y="Axis 2, 8.815%", color="developmental stage", shape = "profiling method")+
+  #theme_bw() + 
+  #theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+#       panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))
+#p1
 
 
 axis.text.x = element_blank(), axis.text.y = element_blank()
@@ -67,3 +84,7 @@ mgx_unique <- unique(df_mgx$sampleid)
 amp_unique <- unique(df_amp$sampleid)
 
 mgx_unique == amp_unique
+
+# samples with largest differences
+
+bc_dist <- bc_dist[order(bc_dist$paired_bc_vec, decreasing = TRUE),]

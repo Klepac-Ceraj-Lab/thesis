@@ -3,6 +3,8 @@ library(ggplot2)
 library(gridExtra)
 library(dplyr)
 library(phyloseq)
+library(grid)
+library(reshape2)
 
 setwd("/Users/danielle/Documents/thesis/analysis")
 
@@ -27,7 +29,15 @@ samplename <- gsub("-.*", "", sampleid)
 length(samplename)
 length(unique(samplename))
 
-# statistics
+# identifying samples that occured more than once
+n_occur <- data.frame(table(samplename))
+duplicates <- n_occur[n_occur$Freq > 1,]
+
+startsWith(duplicates$samplename, sampleid)
+
+sampleid.exists(startsWith(duplicates$samplename))
+
+# age statistics
 
 df_stage1 <- df[df$dev_stage == "less than 15 months",]
 mean(df_stage1[df_stage1$method == "mgx", ]$shannon)
@@ -69,13 +79,26 @@ df_stage1_mgx <- df_stage1[df_stage1$method == "mgx",]
 df_stage2_mgx <- df_stage2[df_stage2$method == "mgx",]
 df_stage3_mgx <- df_stage3[df_stage3$method == "mgx",]
 
+df_ages <- df[,c("sampleid","method","dev_stage", "AgeMonths")]
+df_ages <- df_ages[df_ages$method == "mgx",]
+
+
 ageplot<- ggplot(df, aes(x = AgeMonths)) + 
   geom_histogram(data=df_stage1_mgx, fill = "#481567FF", alpha=0.7, binwidth = 10)+
   geom_histogram(data=df_stage2_mgx, fill = "#238A8DFF", alpha=0.7, binwidth = 10)+
   geom_histogram(data=df_stage3_mgx, fill = "#FDE725FF", alpha=0.7, binwidth = 10)+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black")) +
-  theme(legend.title = element_blank()) + ylab("# of samples") + xlab("Age (months)") +
+  theme(legend.position="bottom") + ylab("# of samples") + xlab("Age (months)") +
+  labs(title = "", tag = "B")+ theme(legend.position = c(0.5, 0.5))+
+  scale_color_manual(values=c("less than 15 months"="#481567FF", "15 to 30 months"="#238A8DFF",
+                              "older than 30 months"="#FDE725FF"))
+
+ageplot <- ggplot(df_ages, aes(x = AgeMonths, fill = dev_stage)) + 
+  geom_histogram(data = df_ages, position = "identity", alpha = 0.7, binwidth = 10) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"),
+        legend.title = element_blank()) + ylab("# of samples") + xlab("Age (months)") +
   labs(title = "", tag = "B")+ theme(legend.position = c(0.8, 0.8))
 
 ageplot
