@@ -51,3 +51,17 @@ axis.text.x = element_blank(), axis.text.y = element_blank())
 
 p1
 
+# only amp profiles (to layer for powerpoint presentation)
+
+amp_df_sites <- df_sites[df_sites$method == "amp",]
+
+p2 <- ggplot(data = amp_df_sites, aes(x,y,colour=dev_stage, group = sampleid))
+p2 <- p2+geom_point(aes(colour=dev_stage, shape = method, group = sampleid), size = 3, alpha = 0.7) + geom_line() +
+  theme_bw()+labs(x="RDA 1, 35.21% ", y="RDA 2, 21.84%", color="developmental stage", shape = "profiling method")+
+  theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
+        axis.text.x = element_blank(), axis.text.y = element_blank()) 
+
+p2
+
+

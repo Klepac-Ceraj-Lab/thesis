@@ -46,6 +46,9 @@ t.test(log_abund~method, data = all_bugs_abund)
 bugs_16S <- scan("unique_amplicon.txt", what="character", sep=",", strip.white = TRUE)
 bugs_mgx <- scan("unique_mgx.txt", what="character", sep=",", strip.white = TRUE)
 
+# bugs found in both methods (intersection)
+bugs_intersect <- scan("all_taxa.txt", what = "character", sep=",", strip.white = TRUE)
+
 # filter out bugs not unique to either method
 filtered_abund <- abund[abund$taxa %in% bugs_16S | abund$taxa %in% bugs_mgx, ]
 
@@ -100,6 +103,9 @@ hist(all_bugs_mgx_df$abund,
 all_taxa <- unique(abund$taxa)
 avg_absdiff <- aggregate(abund$abs_diff, by=list(abund$taxa), FUN = mean, na.rm=TRUE)
 
+# find largest relative abundance for each sample
+abund %>% group_by(taxa) %>% summarise(B = sum(B))
+
 taxa_order <- avg_absdiff[order(avg_absdiff$x, decreasing = TRUE),]
 top_taxa <- taxa_order[1:5,1] #taxa with largest differences between 16S and mgx
 largest_diff_df <- abund[abund$taxa %in% top_taxa,]
@@ -129,13 +135,15 @@ p3 <- p3 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_
 p3
 grid.arrange(p2, p3, ncol = 2)
 
-# calculating times difference was positive or negative
+# calculating times difference was positive or negative in the intersection of bugs
 
-abund$amplicon_greater[abund$tot_diff > 0 ] <- 1 # 16S abundance was greater
-abund$mgx_greater[abund$tot_diff < 0 ] <- 1 # mgx abundance was greater
+intersect_df <- abund[abund$taxa %in% bugs_intersect,]
 
-total_amplicon_greater <- aggregate(abund$amplicon_greater, by=list(abund$taxa), FUN = sum, na.rm=TRUE)
-total_mgx_greater <- aggregate(abund$mgx_greater, by=list(abund$taxa), FUN = sum, na.rm=TRUE)
+intersect_df$amplicon_greater[intersect_df$tot_diff > 0 ] <- 1 # 16S abundance was greater
+intersect_df$mgx_greater[intersect_df$tot_diff < 0 ] <- 1 # mgx abundance was greater
+
+total_amplicon_greater <- aggregate(intersect_df$amplicon_greater, by=list(abund$taxa), FUN = sum, na.rm=TRUE)
+total_mgx_greater <- aggregate(intersect_df$mgx_greater, by=list(abund$taxa), FUN = sum, na.rm=TRUE)
 
 ratio_df <- total_amplicon_greater
 colnames(ratio_df)[1] <- "taxa"
@@ -168,6 +176,8 @@ colnames(ratiodf2) <- paste(colnames(ratiodf2), " ", sep = "")
 allratiodf <- cbind(ratiodf1, ratiodf2)
 
 formattable(allratiodf)
+
+# write.csv(allratiodf,'ratiodf.csv')
 
 
 
