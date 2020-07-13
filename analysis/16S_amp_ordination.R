@@ -8,10 +8,10 @@ setwd("/Users/danielle/Documents/thesis/paper-abundance-tables")
 
 df <- read.csv("transposed_mgxamp_df.csv", header=TRUE)
 
-abund_table <- df[,5:209]
+abund_table <- df[,5:206]
 abund_table<-subset(abund_table,rowSums(abund_table)!=0)
 
-meta_table <- subset(df,rowSums(df[,5:209])!=0)[,1:4]
+meta_table <- subset(df,rowSums(df[,5:206])!=0)[,1:4]
 
 sol<-rda(abund_table ~ ., data=meta_table)
 scrs<-scores(sol,display=c("sp","wa","lc","bp","cn"))
@@ -42,26 +42,31 @@ axis.expl(sol)
 
 
 # coloring by sampling depth
-p1 <- ggplot(data = df_sites, aes(x,y,colour=dev_stage, shape = method, group = sampleid))
-p1 <- p1+geom_point(aes(colour=dev_stage, shape = method, group = sampleid), size = 3, alpha = 0.7) + geom_line() +
+pcoa1 <- ggplot(data = df_sites, aes(x,y,colour=dev_stage, shape = method, group = sampleid))
+pcoa1 <- pcoa1+geom_point(aes(colour=dev_stage, shape = method, group = sampleid), size = 3, alpha = 0.7) + 
+geom_line(size = 0.5) +
 theme_bw()+labs(x="RDA 1, 35.21% ", y="RDA 2, 21.84%", color="developmental stage", shape = "profiling method")+
 theme(panel.border = element_blank(), panel.grid.major = element_blank(),
 panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
-axis.text.x = element_blank(), axis.text.y = element_blank()) 
+axis.text.x = element_blank(), axis.text.y = element_blank()) +
+  theme(legend.position = c(0.2, 0.8)) + theme(legend.title=element_blank()) + 
+  labs(title = "", tag = "D")
 
-p1
+pcoa1
 
 # only amp profiles (to layer for powerpoint presentation)
 
 amp_df_sites <- df_sites[df_sites$method == "amp",]
 
-p2 <- ggplot(data = amp_df_sites, aes(x,y,colour=dev_stage, group = sampleid))
-p2 <- p2+geom_point(aes(colour=dev_stage, shape = method, group = sampleid), size = 3, alpha = 0.7) + geom_line() +
+pcoa2 <- ggplot(data = amp_df_sites, aes(x,y,colour=dev_stage, group = sampleid))
+pcoa2 <- pcoa2+geom_point(aes(colour=dev_stage, shape = method, group = sampleid), size = 3, alpha = 0.7) + geom_line() +
   theme_bw()+labs(x="RDA 1, 35.21% ", y="RDA 2, 21.84%", color="developmental stage", shape = "profiling method")+
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
-        axis.text.x = element_blank(), axis.text.y = element_blank()) 
+        axis.text.x = element_blank(), axis.text.y = element_blank()) +
+  xlim(-0.5, 0.5)+ ylim(-0.5, 1)
 
-p2
+pcoa1
 
+grid.arrange(pcoa1, pcoa2, ncol = 2)
 
