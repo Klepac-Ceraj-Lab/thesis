@@ -5,6 +5,7 @@ library(phyloseq)
 library(plyr)
 library(ggpubr)
 
+#KSB# fix path
 setwd("/Users/danielle/Documents/thesis/paper-abundance-tables")
 
 abund <- read.csv("paper_abund_df.csv", na.strings=c("","NA"))

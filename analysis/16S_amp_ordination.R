@@ -4,14 +4,18 @@ library(gridExtra)
 library(dplyr)
 library(phyloseq)
 
-setwd("/Users/danielle/Documents/thesis/paper-abundance-tables")
+# Set this to the path to the repo on your system
+repopath = "/Users/danielle/Documents/thesis/"
 
+setwd(file.path(repopath, "paper-abundance-tables"))
+
+#KSB# Need to have instructions on where to get input files like this
 df <- read.csv("transposed_mgxamp_df.csv", header=TRUE)
 
-abund_table <- df[,5:206]
+abund_table <- df[,5:206] #KSB# Where are these indexes come from. If the data changes, will they change?
 abund_table<-subset(abund_table,rowSums(abund_table)!=0)
 
-meta_table <- subset(df,rowSums(df[,5:206])!=0)[,1:4]
+meta_table <- subset(df,rowSums(df[,5:206])!=0)[,1:4] #KSB# same as above
 
 sol<-rda(abund_table ~ ., data=meta_table)
 scrs<-scores(sol,display=c("sp","wa","lc","bp","cn"))
@@ -52,7 +56,7 @@ axis.text.x = element_blank(), axis.text.y = element_blank()) +
   theme(legend.position = c(0.2, 0.8)) + theme(legend.title=element_blank()) + 
   labs(title = "", tag = "D")
 
-pcoa1
+pcoa1 #KSB# Where is this figure output?
 
 # only amp profiles (to layer for powerpoint presentation)
 
