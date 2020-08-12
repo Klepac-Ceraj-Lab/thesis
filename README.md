@@ -1,5 +1,10 @@
 # Danielle Peterson Thesis
 
+## Contents
+
+- include order for going through notebooks
+  - Alternatively (or in addition) you can number directories (eg `1_16S`)
+
 ## Dependencies
 
 ```R
@@ -30,3 +35,4 @@ BiocManager::install("phyloseq") # add version as comment
 ## FASTQ Subsampling code
 
 - see https://github.com/kescobo/dpthesis-subsample
+  - commit hash used

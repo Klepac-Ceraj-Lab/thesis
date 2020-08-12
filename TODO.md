@@ -1,0 +1,7 @@
+- [ ] Extra section in README
+- [ ] Isn't everything "analysis"? I'm unclear how that directory is different from others
+- [ ] Address all added comments (`#KSB# ...`)
+- [ ] Figure out better way to display results from R code
+- [ ] R code should be in Rmd or something - right now results aren't displayed unless code is run
+- [ ] Code organization needs a lot of work, it's unclear where stuff is, directory names are not informative (eg "figures" directory only has one notebook, but lots of others are making figures)
+- [ ] fix all hard-coded paths (examples in `clean_filenames.ipynb` and `16S_amp_ordination.R`)
