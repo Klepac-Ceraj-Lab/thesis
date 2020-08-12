@@ -40,7 +40,7 @@ mean(log(all_bugs_abund$abund[all_bugs_abund$method=="amp"]))
 mean(log(all_bugs_abund$abund[all_bugs_abund$method=="mgx"]))
 
 all_bugs_abund$log_abund <- log(all_bugs_abund$abund)
-t.test(log_abund~method, data = all_bugs_abund)
+t.test(abund~method, data = all_bugs_abund)
 
 # bugs unique to each method
 bugs_16S <- scan("unique_amplicon.txt", what="character", sep=",", strip.white = TRUE)
@@ -68,26 +68,32 @@ unique_bugs_abund <- rbind(bugs_16S_df, bugs_mgx_df)
 unique_bugs_abund[unique_bugs_abund==0] <- NA 
 unique_bugs_abund <- unique_bugs_abund[!is.na(unique_bugs_abund$abund), ]
 
-p1 <- ggplot(unique_bugs_abund, aes(x = method, y = log(abund))) + geom_boxplot()
+p1 <- ggplot(unique_bugs_abund, aes(x = method, y = log(abund))) + 
+  geom_boxplot()
 
-p1 <- p1 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-                 panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+p1 <- p1 + theme(panel.grid.major = element_blank(), 
+                 panel.grid.minor = element_blank(),
+                 panel.background = element_blank(), 
+                 axis.line = element_line(colour = "black")) +
   ylab("log(relative abundance)") + xlab("profiling method") +
   theme(text = element_text(size=20)) +
-  stat_compare_means(method = "t.test", label = "p.signif", label.x = 2, label.y = 10)
+  stat_compare_means(method = "t.test", label = "p.signif", label.x = 2, 
+                     label.y = 10)
 
 p1
 
-mean(log(unique_bugs_abund$abund[unique_bugs_abund$method=="amp"]))
-mean(log(unique_bugs_abund$abund[unique_bugs_abund$method=="mgx"]))
+mean((unique_bugs_abund$abund[unique_bugs_abund$method=="amp"]))
+mean((unique_bugs_abund$abund[unique_bugs_abund$method=="mgx"]))
 
 unique_bugs_abund$log_abund <- log(unique_bugs_abund$abund)
 t.test(abund~method, data = unique_bugs_abund)
 
 grid.arrange(p0, p1, ncol = 2)
 
-# histograms of the distribution of relative abundances of bugs unique to each sample
-# important to make sure that we understand distribution before applying any statistical tests :)
+# histograms of the distribution of relative abundances of bugs unique to each 
+# sample
+# important to make sure that we understand distribution before applying any 
+# statistical tests :)
 
 par(mfrow=c(2,1))
 hist(all_bugs_16S_df$abund,
@@ -135,52 +141,52 @@ p3 <- p3 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_
 p3
 grid.arrange(p2, p3, ncol = 2)
 
-# calculating times difference was positive or negative in the intersection of bugs
+# calculate average total difference for Bacteroides
+mean(largest_totaldiff_df$tot_diff[largest_totaldiff_df$taxa == "Bacteroides"])
 
 intersect_df <- abund[abund$taxa %in% bugs_intersect,]
 
 intersect_df$amplicon_greater[intersect_df$tot_diff > 0 ] <- 1 # 16S abundance was greater
 intersect_df$mgx_greater[intersect_df$tot_diff < 0 ] <- 1 # mgx abundance was greater
 
-total_amplicon_greater <- aggregate(intersect_df$amplicon_greater, by=list(abund$taxa), FUN = sum, na.rm=TRUE)
-total_mgx_greater <- aggregate(intersect_df$mgx_greater, by=list(abund$taxa), FUN = sum, na.rm=TRUE)
+# Mann-whitney test
 
-ratio_df <- total_amplicon_greater
-colnames(ratio_df)[1] <- "taxa"
-colnames(ratio_df)[2] <- "amplicon"
-ratio_df <- cbind(ratio_df, total_mgx_greater$x)
-colnames(ratio_df)[3] <- "mgx"
+# remove bugs that are not present in both methods
+for (bug in unique(intersect_df$taxa)) {
+  bug_df <- subset(intersect_df, intersect_df$taxa == bug)
+  if (mean(bug_df$amplicon_abund) == 0 | mean(bug_df$mgx_abund) == 0) {
+    intersect_df <- subset(intersect_df, intersect_df$taxa != bug)}}
 
-ratio_df$"ratio: 16S/mgx" <- ratio_df$amplicon/ratio_df$mgx
-ratio_df$"ratio: mgx/16S" <- ratio_df$mgx/ratio_df$amplicon
+wilcox_df <- data.frame(matrix(ncol = 4, nrow = length(unique(intersect_df$taxa))))
+colnames(wilcox_df) <- c("taxa","wilcox", "mean_16S", "mean_mgx")
+ wilcox_df$taxa <- unique(intersect_df$taxa)
 
-hist(ratio_df$"ratio: 16S/mgx")
-hist(ratio_df$"ratio: mgx/16S")
+for (bug in wilcox_df$taxa) {
+  # add wilcox test results to dataframe
+  wilcox_df[wilcox_df$taxa == bug,]$wilcox <-(wilcox.test(
+    intersect_df$amplicon_abund[intersect_df$taxa==bug], 
+    intersect_df$mgx_abund[intersect_df$taxa==bug])$p.value)
+  
+  # add mean relative abundance values to dataframe
+  wilcox_df[wilcox_df$taxa == bug,]$mean_16S <- 
+    mean(intersect_df$amplicon_abund[intersect_df$taxa==bug])
+  
+  wilcox_df[wilcox_df$taxa == bug,]$mean_mgx <- 
+    mean(intersect_df$mgx_abund[intersect_df$taxa==bug])
+}
 
-# making tables of the bugs with highest ratio of 16S or mgx
+ wilcox16S <- wilcox_df[wilcox_df$mean_16S > wilcox_df$mean_mgx, ]
+ wilcox16S <- (wilcox16S[order(wilcox16S$wilcox,
+                             decreasing = FALSE),][1:20,c(1:4)])
+ row.names(wilcox16S) <- NULL
+ formattable(wilcox16S)
+ 
+ wilcoxmgx <- wilcox_df[wilcox_df$mean_mgx > wilcox_df$mean_16S, ]
+ wilcoxmgx <- (wilcoxmgx[order(wilcoxmgx$wilcox,
+                               decreasing = FALSE),][1:20,c(1:4)])
+ row.names(wilcoxmgx) <- NULL
+ formattable(wilcoxmgx)
+ 
 
-ratiodf1 <- (ratio_df[order(ratio_df$"ratio: 16S/mgx", ratio_df$amplicon,
-                            decreasing = TRUE),][1:20,c(1:4)])
-ratiodf1[ratiodf1==Inf]<-NA
-row.names(ratiodf1) <- NULL
-formattable(ratiodf1)
-
-ratiodf2 <- formattable(ratio_df[order(ratio_df$"ratio: mgx/16S", ratio_df$mgx,
-                                       decreasing = TRUE),][1:20,c(1,2,3,5)])
-ratiodf2[ratiodf2==Inf]<-NA
-row.names(ratiodf2) <- NULL
-# hack to have columns of same names
-colnames(ratiodf2) <- paste(colnames(ratiodf2), " ", sep = "")
-
-# dataframes together so they can be visible together in table
-allratiodf <- cbind(ratiodf1, ratiodf2)
-
-formattable(allratiodf)
-
-# write.csv(allratiodf,'ratiodf.csv')
-
-
-
-
-
-
+ 
+ 

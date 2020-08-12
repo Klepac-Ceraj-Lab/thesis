@@ -11,7 +11,8 @@ setwd("/Users/danielle/Documents/thesis/paper-abundance-tables")
 
 df <- read.csv("transposed_mgxamp_df.csv", header=TRUE)
 
-abund_table <- as.matrix(df[,5:206])
+total_columns <- ncol(df)
+abund_table <- as.matrix(df[,5:total_columns])
 bins = seq(min(abund_table), max(abund_table), by=0.01)
 hist(abund_table[abund_table != 0.0], xlim = c(0,0.01), col = 'skyblue3',
      breaks = 10000)
