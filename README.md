@@ -4,6 +4,17 @@
 
 ```R
 install.packages("ggplot2") # add version as comment
+install.packages("ape")
+install.packages("gridExtra")
+install.packages("formattable")
+install.packages("phyloseq")
+install.packages("plyr")
+install.packages("dplyr")
+install.packages("ggpubr")
+install.packages("vegan")
+install.packages("sna")
+install.packages("reshape2")
+install.packages("gtools")
 # ... others
 ```
 
