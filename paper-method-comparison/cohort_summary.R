@@ -45,23 +45,20 @@ sqrt(var(df_stage3$AgeMonths))
 
 # only counting 1 profiling method (to get number of kids, not profiles)
 
-ageplot<- ggplot(df, aes(x = AgeMonths)) + 
-  geom_histogram(data=df_stage1, fill = "#481567FF", alpha=0.7, binwidth = 10)+
-  geom_histogram(data=df_stage1, fill = "#238A8DFF", alpha=0.7, binwidth = 10)+
-  geom_histogram(data=df_stage1, fill = "#FDE725FF", alpha=0.7, binwidth = 10)+
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
-  theme(legend.position="bottom") + ylab("# of samples") + xlab("Age (months)") +
-  labs(title = "", tag = "B")+ theme(legend.position = c(0.5, 0.5))+
-  scale_color_manual(values=c("less than 15 months"="#481567FF", "15 to 30 months"="#238A8DFF",
-                              "older than 30 months"="#FDE725FF"))
-
 ageplot <- ggplot(df, aes(x = AgeMonths, fill = dev_stage)) + 
-  geom_histogram(data = df, position = "identity", alpha = 0.7, binwidth = 12) +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.background = element_blank(), axis.line = element_line(colour = "black"),
-        legend.title = element_blank()) + ylab("# of samples") + xlab("Age (months)") +
-  labs(title = "", tag = "")+ theme(legend.position = c(0.8, 0.8))
+  geom_histogram(data = df, 
+                 position = "identity", 
+                 alpha = 0.7, 
+                 binwidth = 12) +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        legend.title = element_blank()) + 
+  ylab("# of samples") + 
+  xlab("Age (months)") +
+  labs(title = "", tag = "") + 
+  theme(legend.position = c(0.8, 0.8))
 
 ageplot
 

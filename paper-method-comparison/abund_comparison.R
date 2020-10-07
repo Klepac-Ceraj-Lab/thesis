@@ -26,14 +26,22 @@ all_bugs_abund <- all_bugs_abund[!is.na(all_bugs_abund$abund), ]
 
 
 # plot relative abundance of each method of all bugs
-p0 <- ggplot(all_bugs_abund, aes(x = method, y = log(abund))) + geom_boxplot()
+p0 <- ggplot(all_bugs_abund, 
+             aes(x = method, 
+                 y = log(abund))) + 
+  geom_boxplot()
 
-p0 <- p0 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-                 panel.background = element_blank(), axis.line = element_line(colour = "black")) +
-  ylab("log(relative abundance)") + xlab("profiling method") +
+p0 <- p0 + theme(panel.grid.major = element_blank(), 
+                 panel.grid.minor = element_blank(),
+                 panel.background = element_blank(), 
+                 axis.line = element_line(colour = "black")) +
+  ylab("log(relative abundance)") + 
+  xlab("profiling method") +
   theme(text = element_text(size=20)) +
-  stat_compare_means(method = "t.test", label = "p.signif", label.x = 2, label.y = 10)
-
+  stat_compare_means(method = "t.test", 
+                     label = "p.signif", 
+                     label.x = 2, 
+                     label.y = 10)
 p0
 
 mean(log(all_bugs_abund$abund[all_bugs_abund$method=="amp"]))
@@ -42,12 +50,21 @@ mean(log(all_bugs_abund$abund[all_bugs_abund$method=="mgx"]))
 all_bugs_abund$log_abund <- log(all_bugs_abund$abund)
 t.test(abund~method, data = all_bugs_abund)
 
-# bugs unique to each method
-bugs_16S <- scan("unique_amplicon.txt", what="character", sep=",", strip.white = TRUE)
-bugs_mgx <- scan("unique_mgx.txt", what="character", sep=",", strip.white = TRUE)
+# read in files with bugs unique to each method
+bugs_16S <- scan("unique_amplicon.txt", 
+                 what="character", sep=",", 
+                 strip.white = TRUE)
+
+bugs_mgx <- scan("unique_mgx.txt", 
+                 what="character", 
+                 sep=",", 
+                 strip.white = TRUE)
 
 # bugs found in both methods (intersection)
-bugs_intersect <- scan("all_taxa.txt", what = "character", sep=",", strip.white = TRUE)
+bugs_intersect <- scan("all_taxa.txt", 
+                       what = "character", 
+                       sep=",", 
+                       strip.white = TRUE)
 
 # filter out bugs not unique to either method
 filtered_abund <- abund[abund$taxa %in% bugs_16S | abund$taxa %in% bugs_mgx, ]
@@ -107,7 +124,8 @@ hist(all_bugs_mgx_df$abund,
 
 # calculating mean absolute difference
 all_taxa <- unique(abund$taxa)
-avg_absdiff <- aggregate(abund$abs_diff, by=list(abund$taxa), FUN = mean, na.rm=TRUE)
+avg_absdiff <- aggregate(abund$abs_diff, by=list(abund$taxa), 
+                         FUN = mean, na.rm=TRUE)
 
 # find largest relative abundance for each sample
 abund %>% group_by(taxa) %>% summarise(B = sum(B))
@@ -117,9 +135,11 @@ top_taxa <- taxa_order[1:5,1] #taxa with largest differences between 16S and mgx
 largest_diff_df <- abund[abund$taxa %in% top_taxa,]
 
 p2 <- ggplot(largest_diff_df, aes(x = taxa, y = abs_diff)) + geom_boxplot()
-p2 <- p2 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-               panel.background = element_blank(), axis.line = element_line(colour = "black")) +
-  ylab("absolute difference in relative abundance")+
+p2 <- p2 + theme(panel.grid.major = element_blank(), 
+                 panel.grid.minor = element_blank(),
+               panel.background = element_blank(), 
+               axis.line = element_line(colour = "black")) +
+  ylab("absolute difference in relative abundance") +
   labs(title = "", tag = "A")
 
 p2
@@ -127,16 +147,20 @@ p2
 
 # plotting total difference in relative abundance by taxa
 
-avg_totdiff <- aggregate(abund$tot_diff, by=list(abund$taxa), FUN = mean, na.rm=TRUE)
+avg_totdiff <- aggregate(abund$tot_diff, 
+                         by=list(abund$taxa), 
+                         FUN = mean, na.rm=TRUE)
+
 taxa_order_totaldiff <- avg_totdiff[order(abs(avg_totdiff$x), decreasing = TRUE),]
 top_taxa_totaldiff <- taxa_order_totaldiff[1:5,1] #taxa with largest differences between 16S and mgx
 largest_totaldiff_df <- abund[abund$taxa %in% top_taxa_totaldiff,]
 
-p3 <- ggplot(largest_totaldiff_df, aes(x = taxa, y = tot_diff)) + geom_boxplot()
+p3 <- ggplot(largest_totaldiff_df, aes(x = taxa, y = tot_diff)) + 
+  geom_boxplot()
 p3 <- p3 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
            panel.background = element_blank(), axis.line = element_line(colour = "black")) +
-  ylab("total difference in relative abundance")+
-  labs(title = "", tag = "")+
+  ylab("total difference in relative abundance") +
+  labs(title = "", tag = "") +
   geom_hline(yintercept=0, linetype="dashed", color = "red")
 p3
 grid.arrange(p2, p3, ncol = 2)
@@ -146,8 +170,10 @@ mean(largest_totaldiff_df$tot_diff[largest_totaldiff_df$taxa == "Bacteroides"])
 
 intersect_df <- abund[abund$taxa %in% bugs_intersect,]
 
-intersect_df$amplicon_greater[intersect_df$tot_diff > 0 ] <- 1 # 16S abundance was greater
-intersect_df$mgx_greater[intersect_df$tot_diff < 0 ] <- 1 # mgx abundance was greater
+# 16S abundance was greater
+intersect_df$amplicon_greater[intersect_df$tot_diff > 0 ] <- 1
+# mgx abundance was greater
+intersect_df$mgx_greater[intersect_df$tot_diff < 0 ] <- 1 
 
 # Mann-whitney test
 
@@ -157,7 +183,8 @@ for (bug in unique(intersect_df$taxa)) {
   if (mean(bug_df$amplicon_abund) == 0 | mean(bug_df$mgx_abund) == 0) {
     intersect_df <- subset(intersect_df, intersect_df$taxa != bug)}}
 
-wilcox_df <- data.frame(matrix(ncol = 4, nrow = length(unique(intersect_df$taxa))))
+wilcox_df <- data.frame(matrix(ncol = 4, 
+                               nrow = length(unique(intersect_df$taxa))))
 colnames(wilcox_df) <- c("taxa","wilcox", "mean_16S", "mean_mgx")
  wilcox_df$taxa <- unique(intersect_df$taxa)
 

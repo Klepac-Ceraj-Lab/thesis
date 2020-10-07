@@ -15,17 +15,23 @@ df["richness"] <- apply(df[,8:95]>0,1,sum)
 
 # subsample children statistics
 
+# average age of children less than 15 months old
 mean(df[df$dev_stage == "less than 15 months",]$AgeMonths)
+
+# number of kids in each age group
 nrow(df[df$dev_stage == "less than 15 months",])
 nrow(df[df$dev_stage == "15 to 30 months",])
 nrow(df[df$dev_stage == "older than 30 months",])
 
+# plots evenness and richness by developmental stage and read depth
 plot0 <- ggplot(df, aes(sampling_cat, shannon)) + 
-  geom_point(aes(shape=dev_stage, color = sampling_cat))+
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.background = element_blank(), axis.line = element_line(colour = "black"))+
+  geom_point(aes(shape=dev_stage, color = sampling_cat)) +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black")) +
   labs(x="sampling depth", y="Shannon Index", 
-       color="read depth", shape="developmental stage")+
+       color="read depth", shape="developmental stage") +
   labs(title = "", tag = "A")
 plot0
 
