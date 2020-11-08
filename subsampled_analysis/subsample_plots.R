@@ -5,13 +5,18 @@ library(dplyr)
 library(phyloseq)
 library(ggpubr)
 
+# index of where bug abundances columns start and end
+start_bugs <- 7
+end_bugs <- 104
 
 setwd("/Users/danielle/Documents/thesis/subsampled_analysis")
 
 df <- read.csv("subsampled_df.csv", header=TRUE)
-df["shannon"] <- diversity(df[,8:95], "shannon")
-df["evenness"] <- diversity(df[,8:95], "simpson")
-df["richness"] <- apply(df[,8:95]>0,1,sum)
+
+df[is.na(df)] <- 0
+df["shannon"] <- diversity(df[,start_bugs:end_bugs], "shannon")
+df["evenness"] <- diversity(df[,start_bugs:end_bugs], "simpson")
+df["richness"] <- apply(df[,start_bugs:end_bugs]>0,1,sum)
 
 # subsample children statistics
 
@@ -43,7 +48,8 @@ df$dev_stage <- factor(df$dev_stage,
 plot1 <- ggplot(df, aes(richness, evenness)) + 
   geom_point(aes(shape=dev_stage, color = sampling_cat))+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.background = element_blank(), axis.line = element_line(colour = "black"))+
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"))+
   labs(x="richness", y="evenness", 
        color="read depth", shape="developmental stage")+
   labs(title = "", tag = "A")
@@ -58,7 +64,7 @@ plot2 <- ggplot(df, aes(richness, evenness)) +
 plot2
 
 
-gl <- list(plot1, p3, plot2)
+gl <- list(plot0, plot1, plot2)
 
 grid.arrange(
   grobs = gl,
@@ -70,9 +76,9 @@ grid.arrange(
 # pcoa plots
 # http://userweb.eng.gla.ac.uk/umer.ijaz/bioinformatics/ecological.html
 
-abund_table <- df[,8:97]
+abund_table <- df[,start_bugs:end_bugs]
 abund_table<-subset(abund_table,rowSums(abund_table)!=0)
-meta_table <- subset(df,rowSums(df[,8:97])!=0)[,2:7]
+meta_table <- subset(df,rowSums(df[,start_bugs:end_bugs])!=0)[,1:start_bugs-1]
 
 sol<-rda(abund_table ~ ., data=meta_table)
 scrs<-scores(sol,display=c("sp","wa","lc","bp","cn"))
@@ -154,3 +160,4 @@ anova <- aov(df$richness~df$sampling_cat)
 summary(anova)
 posthoc <- TukeyHSD(anova,conf.level=0.95)
 posthoc
+
