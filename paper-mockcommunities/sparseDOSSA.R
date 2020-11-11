@@ -11,6 +11,7 @@ n.samples <- 2500
 
 setwd("/Users/danielle/Documents/thesis/paper-mockcommunities")
 
+# read in file of mock communities
 mock <- read.csv("SyntheticMicrobiome-Counts.csv", header=TRUE, 
                  stringsAsFactors=FALSE)
 
