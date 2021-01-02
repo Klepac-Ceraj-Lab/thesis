@@ -39,7 +39,7 @@ nrow(df[df$dev_stage == "older than 30 months",])
 
 df <- subset(df, sampling_cat != 10)
 
-plot0 <- ggplot(df, aes(sampling_cat, shannon)) + 
+plot1 <- ggplot(df, aes(sampling_cat, shannon)) + 
   geom_point(aes(shape=dev_stage, color = sampling_cat)) +
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
@@ -48,7 +48,7 @@ plot0 <- ggplot(df, aes(sampling_cat, shannon)) +
   labs(x="sampling depth", y="Shannon Index", 
        color="read depth", shape="developmental stage") +
   labs(title = "", tag = "A") 
-plot0
+plot1
 
 df$dev_stage <- factor(df$dev_stage,
                             levels = c("less than 15 months", 
@@ -58,7 +58,7 @@ df$sampling_cat <- factor(df$sampling_cat,
                           levels = c(10, 100, 250, 500, 750, 1000, "original depth"),
                           ordered = TRUE)
 
-plot1 <- ggplot(df, aes(richness, evenness)) + 
+plot2 <- ggplot(df, aes(richness, evenness)) + 
   geom_point(aes(color=dev_stage, alpha = sampling_cat))+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), 
@@ -67,18 +67,18 @@ plot1 <- ggplot(df, aes(richness, evenness)) +
        color="read depth", alpha="sampling depth") +
   labs(title = "", tag = "A")+ theme(legend.position = c(.85,.35)) +
   ylab("evenness (Pielou's measure)")
-plot1
+plot2
 
-plot2 <- ggplot(df, aes(richness, evenness)) + 
+plot3 <- ggplot(df, aes(richness, evenness)) + 
   geom_point(aes(shape=sampling_cat, color = sampleid)) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"))+
   labs(x="richness", y="evenness", color="sample", shape = "sampling depth")
 
-plot2
+plot3
 
 
-gl <- list(plot0, plot1, plot2)
+gl <- list(plot1, plot2, plot3)
 
 grid.arrange(
   grobs = gl,
@@ -136,7 +136,7 @@ df_sites$dev_stage <- factor(df_sites$dev_stage,
                                        "older than 30 months"),ordered = TRUE)
 
 
-p1<-ggplot(df_sites, aes(df_sites$x, df_sites$y, colour=sampling_cat, shape = dev_stage)) +
+plot4<-ggplot(df_sites, aes(df_sites$x, df_sites$y, colour=sampling_cat, shape = dev_stage)) +
   geom_point()+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"))+
@@ -144,20 +144,22 @@ p1<-ggplot(df_sites, aes(df_sites$x, df_sites$y, colour=sampling_cat, shape = de
                   color="sampling depth", shape = "developmental stage")+ 
   theme(legend.position = "none")+
   labs(title = "", tag = "B")
-p1
+plot4
 
 # calculating statistics
 
 df_subsampled <- subset(df, sampling_cat != "original depth")
 
-p4 <- ggplot(df_subsampled, aes(x = sampling_cat, y = richness, fill= dev_stage)) + 
+plot5 <- ggplot(df_subsampled, aes(x = sampling_cat, y = shannon, fill= dev_stage)) + 
   geom_boxplot()
-p4 <- p4 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+plot5 <- plot5 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                  panel.background = element_blank(), 
                  axis.line = element_line(colour = "black")) +
-  ylab("richness (genus counts)")+ xlab("sampling depth (k reads)") +
-  labs(title = "", tag = "B") + theme(legend.position = "none")+ ylim(0,40)
-p4
+  ylab("alpha-diversity (Shannon Index)")+ xlab("sampling depth (k reads)") +
+  labs(title = "", tag = "B") + theme(legend.position = "none") + ylim(0,3)
+plot5
+
+
 
 
 original_data <- subset(df, sampling_cat == "original depth")
@@ -166,9 +168,9 @@ original_data$dev_stage <- factor(original_data$dev_stage,
                                         "15 to 30 months", 
                                         "older than 30 months"),ordered = TRUE)
 
-p5 <- ggplot(original_data, aes(x = (read_depth/1000), y = richness)) +  
+plot6 <- ggplot(original_data, aes(x = (read_depth/1000), y = shannon)) +  
   geom_point(aes(color = dev_stage))
-p5 <- p5 +
+plot6 <- plot6 +
   theme(panel.grid.major = element_blank(), 
                  panel.grid.minor = element_blank(),
                  panel.background = element_blank(), 
@@ -178,11 +180,11 @@ p5 <- p5 +
                  axis.ticks.y = element_blank(), 
                 axis.line.y = element_blank()) + 
   theme(legend.position = "none") + 
-  ylim(0, 40) +
+  ylim(0, 3) +
   xlab("original read depth")
-p5
+plot6
 
-gl <- list(plot1, p4, p5)
+gl <- list(plot2, plot5, plot6)
 
 lay <- rbind(c(1,1,2,2,3),
              c(1,1,2,2,3),
@@ -202,8 +204,71 @@ IQR((df[df$sampling_cat == "1000000.0" ,]$richness), na.rm = TRUE)
 mean((df[df$sampling_cat == "original depth",]$richness), na.rm = TRUE)
 IQR((df[df$sampling_cat == "original depth",]$richness), na.rm = TRUE)
 
-anova <- aov(df$richness~df$sampling_cat*df$dev_stage)
+anova <- aov(df$shannon~df$sampling_cat*df$dev_stage)
 summary(anova)
 posthoc <- TukeyHSD(anova,conf.level=0.95)
-posthoc
+posthoc <- as.data.frame(posthoc$`df$sampling_cat:df$dev_stage`)
+
+keep_cat_tukey <- scan("/Users/danielle/Documents/thesis/subsampled_analysis/keep_cat_tukey.txt", 
+     what="character", sep=",", 
+     strip.white = TRUE)
+
+# only keep comparisons we care about and highlight significant p-values
+
+posthoc$comparisons <- rownames(posthoc)
+posthoc <- posthoc[posthoc$comparisons %in% keep_cat_tukey,]
+posthoc$less_0.05 <- posthoc$`p adj`< 0.05
+posthoc$less_0.005 <- posthoc$`p adj`< 0.005
+
+# write.csv(posthoc,"subsampling_tukey.csv")
+
+
+# supplemental figures
+
+# broken down by dev_stage
+
+update_geom_defaults("point", list(colour = NULL))
+m <- ggplot(movies, aes(y = votes, x = factor(round(rating)),
+                        colour = factor(Animation)))
+
+my_comparisons_1 <- list(c("100", "250"), c("250", "750"), c("750", "1000"))
+
+# define the summary function
+f <- function(x) {
+  r <- quantile(x, probs = c(0.05, 0.25, 0.5, 0.75, 0.95))
+  names(r) <- c("ymin", "lower", "middle", "upper", "ymax")
+  r
+}
+# define outlier function, beyound 5 and 95% percentiles
+o <- function(x) {
+  subset(x, x < quantile(x,probs=c(0.05))[1] | quantile(x,probs=c(0.95))[1] < x)
+}
+
+s1 <- ggplot(df, aes(x = sampling_cat, y = richness, fill= dev_stage)) + 
+  facet_wrap(~dev_stage) +
+  geom_boxplot()
+s1 <- s1 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                 panel.background = element_blank(), 
+                 axis.line = element_line(colour = "black")) +
+  ylab("richness (genus counts)")+ xlab("sampling depth (k reads)")  + 
+  labs(title = "", tag = "A")  
+
+s1 <- s1 + stat_summary(fun.data=f, geom='boxplot')
+s1 <- s1 + stat_summary(fun.y=o, geom='point', aes(colour=factor(dev_stage)))
+s1 + scale_y_log10()
+s1
+
+labs(title = "", tag = "B") + theme(legend.position = "none")+ ylim(0,40)
+
+# broken down by sampling depth
+
+update_geom_defaults("point", list(colour = NULL))
+s2 <- ggplot(df, aes(x = sampling_cat, y = richness, fill= dev_stage)) + 
+  geom_boxplot(outlier.colour = NULL)
+s2 <- s2 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                 panel.background = element_blank(), 
+                 axis.line = element_line(colour = "black")) +
+  ylab("richness (genus counts)") + xlab("sampling depth (k reads)")  + 
+  labs(title = "", tag = "B") 
+s2
 
