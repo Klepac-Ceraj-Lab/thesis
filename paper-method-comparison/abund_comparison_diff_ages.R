@@ -5,8 +5,15 @@ library(dplyr)
 library(phyloseq)
 library(reshape2)
 
+setwd(Sys.getenv("REPOPATH"))
 
-setwd("/Users/danielle/Documents/thesis/analysis")
+# download data as described in `diabimmune/data/README.md`
+
+# creates "metadata"
+load("diabimmune/data/DIABIMMUNE_Karelia_metadata.RData")
+# creates data_16s
+load("diabimmune/data/DIABIMMUNE_Karelia_16S_data.RData")
+data_mgx <- read.csv("diabimmune/data/DIABIMMUNE_karelia_metaphlan_table.txt", sep='\t')
 
 df <- read.csv("transposed_mgxamp_df.csv", header=TRUE)
 

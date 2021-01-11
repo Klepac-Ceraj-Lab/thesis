@@ -6,6 +6,7 @@ library(phyloseq)
 library(sna)
 library(reshape2)
 library(gtools)
+library(ape)
 
 setwd("/Users/danielle/Documents/thesis/paper-abundance-tables")
 
@@ -28,7 +29,7 @@ p1 <- ggplot(df, aes(x = dev_stage, y = shannon)) + geom_boxplot(aes(colour = me
 p1 <- p1 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                  panel.background = element_blank(), axis.line = element_line(colour = "black")) +
   ylab("Shannon diversity")+labs(title = "", tag = "A") + xlab("developmental stage") +
-  theme(legend.position = c(0.9, 0.95)) + theme(legend.title=element_blank())
+  theme(legend.position = "none")
 
 p1
 
@@ -121,7 +122,7 @@ p2 <- ggplot(bc_method_df, aes(x = dev_stage, y = BC_dist)) +
         axis.line = element_line(colour = "black")) +
   ylab("Bray Curtis dissimilarity") + xlab("developmental stage") +
   labs(title = "", tag = "B") +
-  theme(legend.position = "none")
+  theme(legend.position = c(0.9, 0.95)) + theme(legend.title=element_blank())
 p2
 
 # statistics
@@ -276,45 +277,61 @@ t.test((age_bc_df[age_bc_df$dev_stage == "less than 15 months" &
 
 abund_table<-subset(abund_table,rowSums(abund_table)!=0)
 meta_table <- subset(df,rowSums(df[,5:206])!=0)[,1:4]
-sol<-rda(abund_table ~ ., data=meta_table)
-scrs<-scores(sol,display=c("sp","wa","lc","bp","cn"))
-df_sites<-data.frame(scrs$sites,meta_table$sampleid, meta_table$AgeMonths, 
-                     meta_table$dev_stage, meta_table$method)
-colnames(df_sites)<-c("x","y","sampleid", "AgeMonths", "dev_stage", "method")
-df_sites$dev_stage <- factor(df_sites$dev_stage,
+
+### Pcoa plot
+dist <- vegdist(abund_table,  method = "bray")
+PCOA <- pcoa(dist)
+
+pcoa_vectors <- as.data.frame(PCOA$vectors)
+
+pcoa_2_vectors <- cbind.data.frame(pcoa_vectors$Axis.1, pcoa_vectors$Axis.2)
+pcoa_plot <- cbind(pcoa_2_vectors, meta_table$sampleid, meta_table$AgeMonths, 
+                   meta_table$dev_stage, meta_table$method)
+
+colnames(pcoa_plot)<-c("x","y","sampleid", "AgeMonths", "dev_stage", "method")
+pcoa_plot$dev_stage <- factor(df_sites$dev_stage,
                              levels = c("less than 15 months", 
                                         "15 to 30 months", 
                                         "older than 30 months"),ordered = TRUE)
-# finding main axes of plot
-# for more details: https://github.com/vegandevs/vegan/issues/266
-axis.expl <- function(mod, axes = 1:2) {
-  if(is.null(mod$CCA)) {
-    sapply(axes, function(i) {
-      100*mod$RDA$eig[i]/mod$tot.chi
-    })
-  } else {
-    sapply(axes, function(i) {
-      100*mod$CCA$eig[i]/mod$tot.chi
-    })}}
-axes <- axis.expl(sol)
 
-# visualizing plot 
-pcoa1 <- ggplot(data = df_sites, aes(x,y,colour=dev_stage, shape = method, 
+axis1 <- paste("PCoA 1, ", 
+               round(PCOA$values$Relative_eig[1],4)*100, "%", sep = "")
+axis2 <- paste("PCoA 2, ", 
+               round(PCOA$values$Relative_eig[2],4)*100, "%", sep = "")
+
+pcoa1 <- ggplot(data = pcoa_plot, aes(x,y,colour=dev_stage, shape = method, 
                                      group = sampleid))
 pcoa1 <- pcoa1+geom_point(aes(colour=dev_stage, shape = method, 
                               group = sampleid), size = 3, alpha = 0.7) + 
-  geom_line(size = 0.5) + theme_bw()+labs(x=cat("RDA 1, ", axes[1], "%"), 
-                                          y=cat("RDA 2, ", axes[2], "%"), 
+  geom_line(size = 0.5) + theme_bw()+labs(x=axis1, 
+                                          y=axis2, 
                                           color="developmental stage", 
-                                          shape = "profiling method")+
+                                          shape = "profiling method") +
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), 
         axis.line = element_line(colour = "black"),
         axis.text.x = element_blank(), axis.text.y = element_blank()) +
-  theme(legend.position = c(0.2, 0.8)) + theme(legend.title=element_blank()) + 
-  labs(title = "", tag = "D")
+  theme(legend.position = c(0.9, 0.95),
+        legend.text=element_text(size=10),
+        legend.title=element_blank()) + 
+  labs(title = "", tag = "D")+
+  theme(legend.key.size = unit(0.35, "cm"))
 pcoa1
+
+
+# variance explained by first 10 principal components
+top_10_components <- (cumsum(PCOA$values$Relative_eig[1:10]))
+names(top_10_components) <- seq(1, 10, by=1)
+                      
+                              
+barplot(top_10_components,
+        ylab="cummulative percent explained (%)",
+        xlab="principal component #")
+
+
+# aggregating all the plots together
 
 gl <- list(p1, p2, p3, pcoa1)
 grid.arrange(grobs = gl,widths = c(2, 1, 1), 
              layout_matrix = rbind(c(1,2, 2), c(3, 4, 4)))
+

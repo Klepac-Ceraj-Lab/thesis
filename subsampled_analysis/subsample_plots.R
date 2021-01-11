@@ -159,9 +159,6 @@ plot5 <- plot5 + theme(panel.grid.major = element_blank(), panel.grid.minor = el
   labs(title = "", tag = "B") + theme(legend.position = "none") + ylim(0,3)
 plot5
 
-
-
-
 original_data <- subset(df, sampling_cat == "original depth")
 original_data$dev_stage <- factor(original_data$dev_stage,
                              levels = c("less than 15 months", 
@@ -183,6 +180,27 @@ plot6 <- plot6 +
   ylim(0, 3) +
   xlab("original read depth")
 plot6
+
+original_data$read_depth <- original_data$read_depth/1000
+alldata <- rbind(original_data, df_subsampled)
+
+
+ggplot(alldata, aes(x = (read_depth), y = shannon)) +  
+  geom_point(aes(color = dev_stage)) +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(), 
+        axis.line.x = element_line(colour = "black"),
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        axis.ticks.y = element_blank(), 
+        axis.line.y = element_blank()) + 
+  theme(legend.position = "none") + 
+  ylim(0, 3) +
+  xlab("original read depth")
+
+
+
 
 gl <- list(plot2, plot5, plot6)
 
