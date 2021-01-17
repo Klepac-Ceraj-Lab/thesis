@@ -200,8 +200,6 @@ ggplot(alldata, aes(x = (read_depth), y = shannon)) +
   xlab("original read depth")
 
 
-
-
 gl <- list(plot2, plot5, plot6)
 
 lay <- rbind(c(1,1,2,2,3),
@@ -210,17 +208,26 @@ lay <- rbind(c(1,1,2,2,3),
 
 grid.arrange(grobs = gl,layout_matrix = lay)
 
-mean((df[df$sampling_cat == "10000.0" ,]$richness), na.rm = TRUE)
-IQR((df[df$sampling_cat == "10000.0" ,]$richness), na.rm = TRUE)
+mean((df[df$sampling_cat == "100" ,]$shannon), na.rm = TRUE)
+IQR((df[df$sampling_cat == "100" ,]$shannon), na.rm = TRUE)
 
-mean((df[df$sampling_cat == "100000.0" ,]$richness), na.rm = TRUE)
-IQR((df[df$sampling_cat == "100000.0" ,]$richness), na.rm = TRUE)
+mean((df[df$sampling_cat == "250" ,]$shannon), na.rm = TRUE)
+IQR((df[df$sampling_cat == "250" ,]$shannon), na.rm = TRUE)
 
-mean((df[df$sampling_cat == "1000000.0" ,]$richness), na.rm = TRUE)
-IQR((df[df$sampling_cat == "1000000.0" ,]$richness), na.rm = TRUE)
+mean((df[df$sampling_cat == "500" ,]$shannon), na.rm = TRUE)
+IQR((df[df$sampling_cat == "500" ,]$shannon), na.rm = TRUE)
 
-mean((df[df$sampling_cat == "original depth",]$richness), na.rm = TRUE)
-IQR((df[df$sampling_cat == "original depth",]$richness), na.rm = TRUE)
+mean((df[df$sampling_cat == "750" ,]$shannon), na.rm = TRUE)
+IQR((df[df$sampling_cat == "750" ,]$shannon), na.rm = TRUE)
+
+mean((df[df$sampling_cat == "1000" ,]$shannon), na.rm = TRUE)
+IQR((df[df$sampling_cat == "1000" ,]$shannon), na.rm = TRUE)
+
+mean((df[df$sampling_cat == "original depth",]$shannon), na.rm = TRUE)
+IQR((df[df$sampling_cat == "original depth",]$shannon), na.rm = TRUE)
+
+anova_sampling <- aov(df$shannon~df$sampling_cat)
+summary(anova_sampling)
 
 anova <- aov(df$shannon~df$sampling_cat*df$dev_stage)
 summary(anova)
@@ -239,6 +246,21 @@ posthoc$less_0.05 <- posthoc$`p adj`< 0.05
 posthoc$less_0.005 <- posthoc$`p adj`< 0.005
 
 # write.csv(posthoc,"subsampling_tukey.csv")
+
+# range of shannon diversity by age
+
+max((df[df$dev_stage == "less than 15 months" ,]$shannon), na.rm = TRUE) - min((df[df$dev_stage == "less than 15 months" ,]$shannon), na.rm = TRUE)
+median((df[df$dev_stage == "less than 15 months" ,]$shannon), na.rm = TRUE)
+max((df[(df$dev_stage == "15 to 30 months"  | df$dev_stage == "older than 30 months"),]$shannon), na.rm = TRUE) - min((df[(df$dev_stage == "15 to 30 months"  | df$dev_stage == "older than 30 months"),]$shannon), na.rm = TRUE)
+median((df[(df$dev_stage == "15 to 30 months"  | df$dev_stage == "older than 30 months"),]$shannon), na.rm = TRUE)
+
+par(mfrow=c(2,1))
+hist((df[df$dev_stage == "less than 15 months" ,]$shannon), 
+     na.rm = TRUE,
+     xlim = c(0,3), xlab = "Shannon Index", main = "A. Children younger than 15 months")
+hist((df[(df$dev_stage == "15 to 30 months"  | df$dev_stage == "older than 30 months"),]$shannon), 
+     na.rm = TRUE,
+     xlim = c(0,3), xlab = "Shannon Index", main = "B. Children older than 15 months")
 
 
 # supplemental figures
