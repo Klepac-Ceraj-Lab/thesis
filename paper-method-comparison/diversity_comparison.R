@@ -48,6 +48,11 @@ t.test((df[df$dev_stage == "15 to 30 months",]$shannon),
 t.test((df[df$dev_stage == "less than 15 months",]$shannon),
        df[df$dev_stage == "older than 30 months",]$shannon)
 
+# comparing kids older and younger than 30 months 
+t.test((df[df$dev_stage == "less than 15 months" | df$dev_stage =="15 to 30 months",]$shannon),
+       df[df$dev_stage == "older than 30 months",]$shannon)
+
+
 anova <- aov(shannon ~ dev_stage, data = df)
 TukeyHSD(anova)
 
@@ -177,6 +182,8 @@ p0
 # statistics
 t.test(bc_df$paired_bc_vec, bc_df$unpaired_bc_vec)
 mean(bc_df$unpaired_bc_vec) - mean(bc_df$paired_bc_vec, na.rm = TRUE)
+
+mean(bc_df$paired_bc_vec, na.rm = TRUE)
 
 # Bray-curtis for different ages based on profiling method
 mean(bc_method_df[bc_method_df$dev_stage == "less than 15 months",]$BC_dist, 
