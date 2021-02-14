@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1608044605452.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3035052575",
+    "id" : "4E8F24CC",
+    "lastKnownWriteTime" : 1608585171,
+    "last_content_update" : 1608585171496,
+    "path" : "~/Documents/thesis/subsampled_analysis/subsample_plots.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "260,20",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

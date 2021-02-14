@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1608158290575.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1901310459",
+    "id" : "CBF52D20",
+    "lastKnownWriteTime" : 1607980564,
+    "last_content_update" : 1607980564,
+    "path" : "~/Documents/thesis/paper-diabimmune-method-comparison/diversity_comparison.R",
+    "project_path" : "diversity_comparison.R",
+    "properties" : {
+        "cursorPosition" : "173,51",
+        "scrollLine" : "155"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

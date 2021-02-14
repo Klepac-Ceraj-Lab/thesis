@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1608225566289.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1900753894",
+    "id" : "4BBEED1",
+    "lastKnownWriteTime" : 1571948395,
+    "last_content_update" : 1571948395,
+    "path" : "~/Documents/19fall/STAT260/Week5/PetersonD.Assn5.FedPaperCode.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "147,262",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

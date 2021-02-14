@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1609374468893.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "DD0515D4",
+    "lastKnownWriteTime" : 4294967302,
+    "last_content_update" : 1609374468893,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "BD25CF1F",
+        "caption" : "bugs_amp_df",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=bugs_amp_df&cache_key=BD25CF1F",
+        "displayedObservations" : 55,
+        "environment" : "",
+        "object" : "bugs_amp_df",
+        "preview" : 0,
+        "totalObservations" : 55,
+        "variables" : 3
+    },
+    "relative_order" : 8,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

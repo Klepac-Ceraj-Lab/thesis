@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1608570641064.000,
+    "dirty" : true,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "14349047",
+    "lastKnownWriteTime" : 1609382954,
+    "last_content_update" : 1609383395979,
+    "path" : "~/Documents/thesis/paper-primers/SILVA_analysis.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "68,0",
+        "scrollLine" : "48",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

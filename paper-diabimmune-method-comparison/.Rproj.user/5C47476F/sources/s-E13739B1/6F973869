@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1608585771200.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "6F973869",
+    "lastKnownWriteTime" : 6,
+    "last_content_update" : 1608585771200,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "7C7F995",
+        "caption" : "bugs_mgx_df",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=bugs_mgx_df&cache_key=7C7F995",
+        "displayedObservations" : "32",
+        "environment" : "",
+        "object" : "bugs_mgx_df",
+        "preview" : "0",
+        "totalObservations" : "32",
+        "variables" : "3"
+    },
+    "relative_order" : 6,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

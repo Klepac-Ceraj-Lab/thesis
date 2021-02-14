@@ -1,0 +1,155 @@
+# Text Analysis Code for Federalist Papers
+# Created by QAI Intern Joanna Milton '16
+
+# With the help of this code, you will attempt to determine the authorship of some of the Federalist Papers.  Proportions of words (that you choose) from written works of each of the 3 proposed authors will serve as training data.  Once you have established a way to predict authorship based on word frequency, the text of the Federalist papers will be read in, and you will make your predictions. We'll compare your predictions to the predictions of your classmates and others who have attempted this analysis.
+
+
+# Install and load the packages stringr, Hmisc, and party
+# (Some older computers have trouble downloading stringr. If that's the case for you, let the teaching staff know, and we'll see if we can find an easy fix, but note that this does work on the college's public computers.)
+install.packages("stringr")
+install.packages("Hmisc")
+install.packages("party")
+library(stringr)
+library(Hmisc)
+library(party)
+
+
+### This function reads in one file and calculates word frequencies of words that you specify. For now, highlight and run this function (lines 18-44) so that it will be available to you in your workspace.
+
+# Requires a filename, and author name, and a vector of words to be examined
+word.proportion <- function(filename, author, words) {
+	# Scan in writings, downloaded as .txt files, allowing for quoted material to be read in as 	individual words
+	read_in <- scan(filename, what="character", quote="", quiet=TRUE)
+	# Remove all punctuation from each of the strings in the vector in order to make reading proportion of measure words easier (only caveat is now cannot use words that have other meanings with apostrophes removed as measure words (ex. we're turns into were))
+	read_in_cleaned <- str_replace_all(read_in, "[[:punct:]]", "")
+	# Remove the empty strings from the file
+	read_in_cleaned_2 <- read_in_cleaned[read_in_cleaned != ""]
+	# Obtain the total number of words in the document
+	read_in_total <- length(read_in_cleaned_2)
+	
+	# Creates an empty vector for the proportions of the words to be placed in
+	prop_Words = NULL
+	# For loop calculating proportion of words that are a specific word
+	for (ii in 1:length(words)) {
+		# Capitalizes each word in the word list
+		uppercase_word <- capitalize(words[ii])
+		# Counts total number of occurences for each word in the file
+		num_words <- sum(str_count(read_in_cleaned_2, words[ii]), str_count(read_in_cleaned_2, uppercase_word))
+		# Calculates the proportion of words that are the word listed and adds it to the proportions of words vector
+		prop_Words[ii] <- num_words/read_in_total	
+	}
+	
+	# Creates an output vector containing the filename, the author's name, and the proportion for each of the words in word_vector
+	output <- c(filename, author, prop_Words)
+	return(output)
+	}
+	
+### This function reads in a set of files and calculates word frequencies of words that you specify for each of the files. For now, highlight and run this function (lines 48-78) so that it will be available to you in your workspace.	
+	
+# Requires a vector of filenames, a vector of author names, and a vector of words to be examined
+author.words <- function(filenames, authornames, words) {
+	# Create a dataframe with column names
+	myFrame <- data.frame("file"=rep(NA, length(filenames)), "author"=rep(NA,length(filenames)))
+	# For loop creating columns with names of each of the words in the vector
+	for (ii in 1:length(words)) {
+		name <- paste("prop", words[ii], sep=".")
+		myFrame[,name] <- rep(0, length(filenames))
+	}
+	
+	# For loop running each of the files through the word.proportion function and adding the vector to the dataframe
+	for (ii in 1:length(filenames)) {
+		# Generates a vector of proportions of word occurences for each text file
+		new_row <- word.proportion(filenames[ii], authornames[ii], words)
+		# Writes over the previous iith row
+		myFrame[ii,] <- new_row
+	}
+	
+	# Reclassifies the author and file columns as factors instead of characters
+	myFrame$author <- factor(myFrame$author)
+	myFrame$file <- factor(myFrame$file)
+	# Creates a vector of the column names in the dataframe
+	vec_names <- names(myFrame)
+	# For loop reclassifying each of the prop. columns as numeric instead of columns
+	for (ii in 3:length(vec_names)) {
+		myFrame[[vec_names[ii]]] <- as.numeric(myFrame[[vec_names[ii]]])
+	}
+	
+	# Returns the dataframe
+	return(myFrame)
+}
+
+# Here are some words that other authors have used to identify the authors of the Federalist Papers, taken from this paper: http://pages.cs.wisc.edu/~gfung/federalist.pdf
+# Please make changes to this list: add any words you'd like to include and delete any that you would not like to include! Can you think of a useful word that no one else has tried?
+
+# Vector of function words (not dependent on content of the a particular paper) that will be examined in the function
+word_vector <-c("a", "all", "also", "are", "as", "be", "but", "by", "can", "either", "even", "every", "for", "had", "has", "have", "if", "in", "into", "is", "it", "no", "not", "of", "on", "or", "our", "than", "that", "the", "their", "then", "there", "this", "to", "upon", "was", "what", "when", "which", "who", "will", "with","while", "respect")
+
+
+# 15 writings from each author were collected and converted to plain text (.txt) files
+# James Madison's writings were collected from http://www.constitution.org/jm/jm.htm
+# Alexander Hamilton's writings were collected from http://founders.archives.gov/content/volumes#Hamilton
+# John Jay's writings were collected from http://oll.libertyfund.org/people/john-jay
+# I am avoiding speeches and personal correspondence when using writings for author identification since they may have different styles that written works; also am attempting to only consider writings in a 20 year period (1778 to 1798) encompassing when the Federalist Papers were published (1788)
+# Run this code so that the vector "files" contains the names of all the 45 documents for which the authors are known
+files <- c("Memorial and Remonstrance Against Religious Assessments (JM).txt", "FRAMING AND RATIFYING THE CONSTITUTION The Virginia Plan (JM).txt", "Remarks in Congress on Proposed Constitutional Amendments (JM).txt", "Vices of the Political System of the United States (JM).txt", "Observations on the Draught of a Constitution for Virginia (JM).txt", "Population and Emigration (JM).txt", "Public Opinion (JM).txt", "Parties (JM).txt", "Charters (JM).txt", "Government (JM).txt", "Universal Peace (JM).txt", "Consolidation (JM).txt", "Dependent Territories (JM).txt", "Government of the United States (JM).txt", 
+"The Union Who Are Its Real Friends (JM).txt",
+"New York Assembly. Remarks on an Act for Regulating Elections Jan 29 (AH).txt", "New York Assembly. Remarks on an Act for Regulating Elections Jan 24 (AH).txt", "New York Assembly. Remarks on an Act for Regulating Elections Jan 23 (AH).txt", "New York Assembly. Address of the New York Legislature to Governor George Clinton Jan 20 (AH).txt", "The Continentalist No. V (AH).txt", "Report on Revenue Appropriations and Expenditures (AH).txt", "Report Relative to the Loans Negotiated Under the Acts of the Fourth and Twelfth of August 1790 (AH).txt", "Report on Foreign Loans (AH).txt", "Report Exhibiting the Amount of All the Public Funds up to the End of 1792 and Statement of What Remains of Each Appropriation (AH).txt", "Alexander Hamiltons Final Version of the Report on the Subject of Manufactures (AH).txt", "Report on the Petition of the Merchants of Philadelphia Trading to India and China (AH).txt", "New York Assembly Remarks on an Act for Settling Intestate Estates Proving Wills and Granting Administrations (AH).txt", "New York Assembly. Remarks on an Act for the Relief of Arthur Noble (AH).txt", "New York Assembly. Remarks on an Act Concerning Murder (AH).txt", "New York Assembly. Report on a Petition from George Fisher (AH).txt", "JAYS REPLY TO THE NEW YORK COMMITTEE (JJ).txt", "JAY TO THE SOCIETY AT PARIS FOR THE MANUMISSION OF SLAVES (JJ).txt", "JAY TO THE ENGLISH ANTI-SLAVERY SOCIETY (JJ).txt", "JAY TO THE GOVERNORS OF THE STATES (JJ).txt", "JAY TO THE PRESIDENT OF CONGRESS 1 (JJ).txt", "JAY TO THE PRESIDENT OF CONGRESS 2 (JJ).txt", "JAY TO THE PRESIDENT OF CONGRESS 3 (JJ).txt", "JAY TO THE PRESIDENT OF CONGRESS 4 (JJ).txt", "JAY TO THE PRESIDENT OF CONGRESS 5 (JJ).txt", "JAY TO THE PRESIDENT OF CONGRESS 6 (JJ).txt", "JAY TO THE PRESIDENT OF CONGRESS 7 (JJ).txt", "TO THE GENERAL COMMITTEE OF TRYON COUNTY (JJ).txt", "JAY TO THE GENERAL COURT OF NEW HAMPSHIRE (JJ).txt", "Jays Report on the Purchase of Cannon (JJ).txt", "Jay to Committee of Safety New York (JJ).txt")
+
+# Creates a vector of author names
+JamesMadison <- rep("Madison", 15)
+AlexanderHamilton <- rep("Hamilton", 15)
+JohnJay <- rep("Jay", 15)
+authors <- c(JamesMadison, AlexanderHamilton, JohnJay)
+
+
+# This line is important! Runs the function to create the dataframe with proportions of words
+#### IMPORTANT: First, set your working directory to the folder containing the Federalist Papers, either with the function setwd or with the menus in R
+setwd("Downloads/Federalist Papers/")
+
+# Now you will run the function that reads in each of the training papers by these three authors and counts the words in the vector that you specified
+myData <- author.words(files, authors, word_vector)
+head(myData)
+# Did the command above produce an error, listing the name of a particular txt file? Sometimes a computer will change punctuation in a file name when downloading (eg, a comma because an underscore). To fix the problem, change the name of that txt file in your downloaded Federalist Papers folder and in the list of "files" above, and try again.
+
+
+# Get a sense of what this function has created by looking at the first few rows and columns
+myData[1:18,1:5]
+
+# Determines the number of columns in the dataframe created and creates a subset containing only the proportions of words (omitting the first two columns of myData, which are the filename and the author name)
+num_cols <- length(colnames(myData))
+myData_subset <- myData[,3:num_cols]
+
+# Coerces the authors vector to a factor variable, rather than a character variable, so that we can use it as our outcome variable
+authors_factors <- as.factor(authors)
+
+### Use a tree to predict authorship based on word proportions. 
+# The outcome variable is authors_factors, and the predictor variables are the columns in myData_subset
+
+### PUT YOUR CODE HERE
+
+authortree<-ctree(authors_factors~., data=myData_subset)
+plot(authortree)
+
+### Now, you will use the model you just created to make predictions about the authorship of the first three Federalist Papers
+
+# Vector containing the names of the first three Federalist Paper files
+# Files were collected from http://www.gutenberg.org/cache/epub/18/pg18.txt
+federalist_papers <- c("FEDERALIST. No. 1.txt", "FEDERALIST No. 2.txt", "FEDERALIST No. 3.txt")
+
+# Run the function to count the proportions of the words you selected in these first three Federalist Papers
+placeholder<-rep("",3)
+federalistData <- author.words(federalist_papers, placeholder, word_vector)
+# Explanation for "placeholder", from Joanna: When I originally wrote this code I was trying to determine what proportion of my predictions aligned with the "known" authorship as according to the Gutenberg project.  Since you're predicting the authors as is, you don't have this information (and don't need it!) and so can get around missing an argument for the function by putting in a blank author for each of the papers.
+
+# Get a sense of what this function has created by looking at the first few columns
+federalistData[,1:5]
+
+
+### Use the predict function in R or another method (such as inspection of a graphic) to figure out which author you predict for each of the three papers. Include your predictions in your write-up, and also add a row containing your predictions to the shared google spreadsheet.
+
+# Here is the general format of the predict function:
+#predict(NameOfModelOutput, new=NameOfDataSetWithNewObservations)
+
+### PUT YOUR CODE HERE
+
+predict(authortree, new=federalistData, type = "prob")
