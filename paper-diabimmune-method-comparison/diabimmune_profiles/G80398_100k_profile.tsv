@@ -1,0 +1,36 @@
+#mpa_v30_CHOCOPhlAn_201901
+#/home/kevin/Software/miniconda3/envs/bb3/bin/metaphlan output/diabimmune/subsamples/G80398_se_100k.fastq.gz output/diabimmune/profiles/G80398_100k_profile.tsv --bowtie2out output/diabimmune/profiles/G80398_100k_bowtie2.tsv --samout output/diabimmune/profiles/G80398_100k.sam --input_type fastq --nproc 16
+#SampleID	Metaphlan_Analysis
+#clade_name	NCBI_tax_id	relative_abundance	additional_species
+k__Bacteria	2	100.0	
+k__Bacteria|p__Firmicutes	2|1239	63.39533	
+k__Bacteria|p__Proteobacteria	2|1224	20.38017	
+k__Bacteria|p__Actinobacteria	2|201174	16.2245	
+k__Bacteria|p__Firmicutes|c__Clostridia	2|1239|186801	59.14508	
+k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria	2|1224|1236	20.38017	
+k__Bacteria|p__Actinobacteria|c__Actinobacteria	2|201174|1760	16.2245	
+k__Bacteria|p__Firmicutes|c__Negativicutes	2|1239|909932	4.25026	
+k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales	2|1239|186801|186802	59.14508	
+k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Pasteurellales	2|1224|1236|135625	20.38017	
+k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales	2|201174|1760|85004	16.2245	
+k__Bacteria|p__Firmicutes|c__Negativicutes|o__Veillonellales	2|1239|909932|1843489	4.25026	
+k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae	2|1239|186801|186802|186803	59.14508	
+k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Pasteurellales|f__Pasteurellaceae	2|1224|1236|135625|712	20.38017	
+k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae	2|201174|1760|85004|31953	16.2245	
+k__Bacteria|p__Firmicutes|c__Negativicutes|o__Veillonellales|f__Veillonellaceae	2|1239|909932|1843489|31977	4.25026	
+k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Blautia	2|1239|186801|186802|186803|572511	39.82766	
+k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Pasteurellales|f__Pasteurellaceae|g__Haemophilus	2|1224|1236|135625|712|724	20.38017	
+k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Anaerostipes	2|1239|186801|186802|186803|207244	19.31742	
+k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Bifidobacterium	2|201174|1760|85004|31953|1678	16.2245	
+k__Bacteria|p__Firmicutes|c__Negativicutes|o__Veillonellales|f__Veillonellaceae|g__Veillonella	2|1239|909932|1843489|31977|29465	4.25026	
+k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Blautia|s__Ruminococcus_torques	2|1239|186801|186802|186803|572511|33039	37.77011	
+k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Anaerostipes|s__Anaerostipes_hadrus	2|1239|186801|186802|186803|207244|649756	19.31742	
+k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Pasteurellales|f__Pasteurellaceae|g__Haemophilus|s__Haemophilus_sp_HMSC71H05	2|1224|1236|135625|712|724|1608898	12.22498	
+k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Bifidobacterium|s__Bifidobacterium_pseudocatenulatum	2|201174|1760|85004|31953|1678|28026	8.54236	
+k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Pasteurellales|f__Pasteurellaceae|g__Haemophilus|s__Haemophilus_parainfluenzae	2|1224|1236|135625|712|724|729	8.15519	k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Pasteurellales|f__Pasteurellaceae|g__Haemophilus|s__Haemophilus_sp_HMSC061E01,k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Pasteurellales|f__Pasteurellaceae|g__Haemophilus|s__Haemophilus_sp_HMSC073C03,k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Pasteurellales|f__Pasteurellaceae|g__Haemophilus|s__Haemophilus_sp_HMSC61B11,k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Pasteurellales|f__Pasteurellaceae|g__Haemophilus|s__Haemophilus_sp_HMSC068C11,k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Pasteurellales|f__Pasteurellaceae|g__Haemophilus|s__Haemophilus_sp_CCUG_60358
+k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Bifidobacterium|s__Bifidobacterium_bifidum	2|201174|1760|85004|31953|1678|1681	5.52581	k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Bifidobacterium|s__Bifidobacterium_bifidum_CAG_234
+k__Bacteria|p__Firmicutes|c__Negativicutes|o__Veillonellales|f__Veillonellaceae|g__Veillonella|s__Veillonella_dispar	2|1239|909932|1843489|31977|29465|39778	2.6115	k__Bacteria|p__Firmicutes|c__Negativicutes|o__Veillonellales|f__Veillonellaceae|g__Veillonella|s__Veillonella_sp_T14073_2
+k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Blautia|s__Blautia_wexlerae	2|1239|186801|186802|186803|572511|418240	2.05755	
+k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Bifidobacterium|s__Bifidobacterium_breve	2|201174|1760|85004|31953|1678|1685	1.67623	
+k__Bacteria|p__Firmicutes|c__Negativicutes|o__Veillonellales|f__Veillonellaceae|g__Veillonella|s__Veillonella_atypica	2|1239|909932|1843489|31977|29465|39777	1.63876	k__Bacteria|p__Firmicutes|c__Negativicutes|o__Veillonellales|f__Veillonellaceae|g__Veillonella|s__Veillonella_sp_HPA0037,k__Bacteria|p__Firmicutes|c__Negativicutes|o__Veillonellales|f__Veillonellaceae|g__Veillonella|s__Veillonella_sp_T34266_5,k__Bacteria|p__Firmicutes|c__Negativicutes|o__Veillonellales|f__Veillonellaceae|g__Veillonella|s__Veillonella_sp_ACP1,k__Bacteria|p__Firmicutes|c__Negativicutes|o__Veillonellales|f__Veillonellaceae|g__Veillonella|s__Veillonella_sp_ICM51a
+k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Bifidobacterium|s__Bifidobacterium_longum	2|201174|1760|85004|31953|1678|216816	0.4801	k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Bifidobacterium|s__Bifidobacterium_longum_CAG_69

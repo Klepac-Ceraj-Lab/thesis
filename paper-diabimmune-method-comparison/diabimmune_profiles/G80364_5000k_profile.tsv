@@ -1,0 +1,29 @@
+#mpa_v30_CHOCOPhlAn_201901
+#/home/kevin/Software/miniconda3/envs/bb3/bin/metaphlan output/diabimmune/subsamples/G80364_se_5000k.fastq.gz output/diabimmune/profiles/G80364_5000k_profile.tsv --bowtie2out output/diabimmune/profiles/G80364_5000k_bowtie2.tsv --samout output/diabimmune/profiles/G80364_5000k.sam --input_type fastq --nproc 16
+#SampleID	Metaphlan_Analysis
+#clade_name	NCBI_tax_id	relative_abundance	additional_species
+k__Bacteria	2	100.0	
+k__Bacteria|p__Firmicutes	2|1239	48.37554	
+k__Bacteria|p__Actinobacteria	2|201174	48.10585	
+k__Bacteria|p__Verrucomicrobia	2|74201	3.51861	
+k__Bacteria|p__Firmicutes|c__Bacilli	2|1239|91061	48.37554	
+k__Bacteria|p__Actinobacteria|c__Actinobacteria	2|201174|1760	48.10585	
+k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae	2|74201|203494	3.51861	
+k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales	2|1239|91061|186826	48.37554	
+k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales	2|201174|1760|85004	48.10585	
+k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales	2|74201|203494|48461	3.51861	
+k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae	2|201174|1760|85004|31953	48.10585	
+k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae	2|1239|91061|186826|33958	47.65923	
+k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales|f__Akkermansiaceae	2|74201|203494|48461|1647988	3.51861	
+k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Leuconostocaceae	2|1239|91061|186826|81850	0.71631	
+k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Bifidobacterium	2|201174|1760|85004|31953|1678	48.10585	
+k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus	2|1239|91061|186826|33958|1578	47.65923	
+k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales|f__Akkermansiaceae|g__Akkermansia	2|74201|203494|48461|1647988|239934	3.51861	
+k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Leuconostocaceae|g__Oenococcus	2|1239|91061|186826|81850|46254	0.71631	
+k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Bifidobacterium|s__Bifidobacterium_bifidum	2|201174|1760|85004|31953|1678|1681	35.8368	k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Bifidobacterium|s__Bifidobacterium_bifidum_CAG_234
+k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus|s__Lactobacillus_parabuchneri	2|1239|91061|186826|33958|1578|152331	35.75877	
+k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Bifidobacterium|s__Bifidobacterium_pseudocatenulatum	2|201174|1760|85004|31953|1678|28026	12.26905	
+k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus|s__Lactobacillus_coryniformis	2|1239|91061|186826|33958|1578|1610	9.15122	
+k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales|f__Akkermansiaceae|g__Akkermansia|s__Akkermansia_muciniphila	2|74201|203494|48461|1647988|239934|239935	3.51861	k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales|f__Akkermansiaceae|g__Akkermansia|s__Akkermansia_sp_54_46,k__Bacteria|p__Verrucomicrobia|c__Verrucomicrobiae|o__Verrucomicrobiales|f__Akkermansiaceae|g__Akkermansia|s__Akkermansia_sp_CAG_344
+k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus|s__Lactobacillus_brevis	2|1239|91061|186826|33958|1578|1580	2.74924	
+k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Leuconostocaceae|g__Oenococcus|s__Oenococcus_alcoholitolerans	2|1239|91061|186826|81850|46254|931074	0.71631	

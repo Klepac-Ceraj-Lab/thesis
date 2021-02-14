@@ -1,0 +1,18 @@
+#mpa_v30_CHOCOPhlAn_201901
+#/home/kevin/Software/miniconda3/envs/bb3/bin/metaphlan output/diabimmune/subsamples/G78690_se_250k.fastq.gz output/diabimmune/profiles/G78690_250k_profile.tsv --bowtie2out output/diabimmune/profiles/G78690_250k_bowtie2.tsv --samout output/diabimmune/profiles/G78690_250k.sam --input_type fastq --nproc 16
+#SampleID	Metaphlan_Analysis
+#clade_name	NCBI_tax_id	relative_abundance	additional_species
+k__Bacteria	2	100.0	
+k__Bacteria|p__Actinobacteria	2|201174	100.0	
+k__Bacteria|p__Actinobacteria|c__Actinobacteria	2|201174|1760	97.45774	
+k__Bacteria|p__Actinobacteria|c__Coriobacteriia	2|201174|84998	2.54226	
+k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales	2|201174|1760|85004	97.45774	
+k__Bacteria|p__Actinobacteria|c__Coriobacteriia|o__Coriobacteriales	2|201174|84998|84999	2.54226	
+k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae	2|201174|1760|85004|31953	97.45774	
+k__Bacteria|p__Actinobacteria|c__Coriobacteriia|o__Coriobacteriales|f__Coriobacteriaceae	2|201174|84998|84999|84107	2.54226	
+k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Bifidobacterium	2|201174|1760|85004|31953|1678	97.45774	
+k__Bacteria|p__Actinobacteria|c__Coriobacteriia|o__Coriobacteriales|f__Coriobacteriaceae|g__Collinsella	2|201174|84998|84999|84107|102106	2.54226	
+k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Bifidobacterium|s__Bifidobacterium_bifidum	2|201174|1760|85004|31953|1678|1681	63.41704	k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Bifidobacterium|s__Bifidobacterium_bifidum_CAG_234
+k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Bifidobacterium|s__Bifidobacterium_longum	2|201174|1760|85004|31953|1678|216816	32.73033	k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Bifidobacterium|s__Bifidobacterium_longum_CAG_69
+k__Bacteria|p__Actinobacteria|c__Coriobacteriia|o__Coriobacteriales|f__Coriobacteriaceae|g__Collinsella|s__Collinsella_aerofaciens	2|201174|84998|84999|84107|102106|74426	2.54226	
+k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Bifidobacterium|s__Bifidobacterium_pseudocatenulatum	2|201174|1760|85004|31953|1678|28026	1.31038	

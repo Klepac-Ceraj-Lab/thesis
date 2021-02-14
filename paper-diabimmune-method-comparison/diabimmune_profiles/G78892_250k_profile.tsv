@@ -1,0 +1,5 @@
+#mpa_v30_CHOCOPhlAn_201901
+#/home/kevin/Software/miniconda3/envs/bb3/bin/metaphlan output/diabimmune/subsamples/G78892_se_250k.fastq.gz output/diabimmune/profiles/G78892_250k_profile.tsv --bowtie2out output/diabimmune/profiles/G78892_250k_bowtie2.tsv --samout output/diabimmune/profiles/G78892_250k.sam --input_type fastq --nproc 16
+#SampleID	Metaphlan_Analysis
+#clade_name	NCBI_tax_id	relative_abundance	additional_species
+UNKNOWN	-1	100.0	

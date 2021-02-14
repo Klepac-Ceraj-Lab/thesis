@@ -1,0 +1,11 @@
+#mpa_v30_CHOCOPhlAn_201901
+#/home/kevin/Software/miniconda3/envs/bb3/bin/metaphlan output/diabimmune/subsamples/G80438_se_10k.fastq.gz output/diabimmune/profiles/G80438_10k_profile.tsv --bowtie2out output/diabimmune/profiles/G80438_10k_bowtie2.tsv --samout output/diabimmune/profiles/G80438_10k.sam --input_type fastq --nproc 16
+#SampleID	Metaphlan_Analysis
+#clade_name	NCBI_tax_id	relative_abundance	additional_species
+k__Bacteria	2	100.0	
+k__Bacteria|p__Proteobacteria	2|1224	100.0	
+k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria	2|1224|1236	100.0	
+k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales	2|1224|1236|91347	100.0	
+k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae	2|1224|1236|91347|543	100.0	
+k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Klebsiella	2|1224|1236|91347|543|570	100.0	
+k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Klebsiella|s__Klebsiella_aerogenes	2|1224|1236|91347|543|570|548	100.0	
