@@ -56,9 +56,9 @@ df$dev_stage <- factor(df$dev_stage,
                             levels = c("less than 15 months", 
                                        "15 to 30 months", 
                                        "older than 30 months"),ordered = TRUE)
-#df$sampling_cat <- factor(df$sampling_cat,
-#                          levels = c(10, 100, 250, 500, 750, 1000, "original depth"),
-#                          ordered = TRUE)
+df$sampling_cat <- factor(df$sampling_cat,
+                          levels = c(10, 100, 250, 500, 750, 1000, "original depth"),
+                          ordered = TRUE)
 
 plot2 <- ggplot(df, aes(richness, evenness)) + 
   geom_point(aes(color=dev_stage, alpha = sampling_cat))+
@@ -66,7 +66,7 @@ plot2 <- ggplot(df, aes(richness, evenness)) +
         panel.background = element_blank(), 
         axis.line = element_line(colour = "black"))+
   labs(x="richness", y="evenness", 
-       color="read depth", alpha="sampling depth (k reads)") +
+       color="developmental stage", alpha="sampling depth (k reads)") +
   labs(title = "", tag = "A")+ theme(legend.position = c(.85,.35)) +
   ylab("evenness (Pielou's measure)")
 plot2
@@ -146,6 +146,8 @@ plot4<-ggplot(df_sites, aes(df_sites$x, df_sites$y, colour=sampling_cat, shape =
                   color="sampling depth", shape = "developmental stage")+ 
   theme(legend.position = "none")+
   labs(title = "", tag = "B")
+
+# purple box
 plot4
 
 # calculating statistics
@@ -164,14 +166,67 @@ sampling_model <- lmer(shannon ~ read_depth*dev_stage_factor+(1|sampleid),
 anova(sampling_model)
 summary(sampling_model) # p-values
 
+young_kids_1 <- sampling_df[sampling_df$dev_stage=="less than 15 months"
+                          & sampling_df$read_depth < 300,]
 
+sampling_model_young_kids_1 <- lmer(shannon ~ read_depth+(1|sampleid), 
+                       data = young_kids_1)
+summary(sampling_model_young_kids_1) # p-values
+
+##### quadratic model
+# add original depths, log all depths(so og is not outlier)
+
+sampling_df$dev_stage_factor <- as.factor(as.character(sampling_df$dev_stage))
+
+sampling_model_young_kids_1 <- lmer(shannon ~ read_depth*dev_stage+I(read_depth^2)*dev_stage+(1|sampleid), 
+                                    data = sampling_df)
+summary(sampling_model_young_kids_1) # p-values
+
+# model for comparison
+temp <- lmer(shannon ~ read_depth+dev_stage+I(read_depth^2)+(1|sampleid), 
+                                    data = sampling_df)
+summary(temp) # p-values
+
+# 1st model: curves are different for three groups (interaction of developmental stage with read depth)
+# 2nd model: no interaction
+## p-value < 0.001
+anova(sampling_model_young_kids_1, temp)
+#########
+
+young_kids_2 <- sampling_df[sampling_df$dev_stage=="less than 15 months"
+                            & (sampling_df$read_depth == 500
+                            | sampling_df$read_depth == 250),]
+
+sampling_model_young_kids_2 <- lmer(shannon ~ read_depth+(1|sampleid), 
+                                    data = young_kids_2)
+summary(sampling_model_young_kids_2) # p-values
+
+
+#####
+
+young_kids_3 <- sampling_df[sampling_df$dev_stage=="less than 15 months"
+                            & (sampling_df$read_depth == 750
+                               | sampling_df$read_depth == 1000),]
+
+sampling_model_young_kids_3 <- lmer(shannon ~ read_depth+(1|sampleid), 
+                                    data = young_kids_3)
+summary(sampling_model_young_kids_3) # p-values
+
+
+#######
+
+
+youngest_kids <- df[df$dev_stage=="less than 15 months",]
+by(youngest_kids$shannon, youngest_kids$sampling_cat, mean)
+
+#########
 original_data <- subset(df, sampling_cat == "original depth")
 original_data$dev_stage <- factor(original_data$dev_stage,
                              levels = c("less than 15 months", 
                                         "15 to 30 months", 
                                         "older than 30 months"),ordered = TRUE)
 
-df_subsampled$dev_stage <- as.factor(df_subsampled$dev_stage, ordered = TRUE,
+df_subsampled$dev_stage <- factor(df_subsampled$dev_stage, ordered=TRUE
                                      levels= c("less than 15 months",
                                                "15 to 30 months",
                                                "older than 30 months"))

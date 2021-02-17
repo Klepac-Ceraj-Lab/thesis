@@ -6,13 +6,12 @@ library(phyloseq)
 library(ggpubr)
 
 # index of where bug abundances columns start and end
-start_bugs <- 8
-end_bugs <- 107
+start_bugs <- 7
+end_bugs <- 225
 
 setwd("/Users/danielle/Documents/thesis/paper-diabimmune-method-comparison")
 
 df <- read.csv("diabimmune_subsampled_df.csv", header=TRUE)
-
 
 df[is.na(df)] <- 0
 df["shannon"] <- diversity(df[,start_bugs:end_bugs], "shannon")
@@ -51,22 +50,26 @@ plot1 <- ggplot(df, aes(sampling_cat, shannon)) +
 plot1
 
 df$dev_stage <- factor(df$dev_stage,
-                            levels = c("less than 15 months", 
-                                       "15 to 30 months", 
-                                       "older than 30 months"),ordered = TRUE)
+                       levels = c("less than 15 months", 
+                                  "15 to 30 months", 
+                                  "older than 30 months"),ordered = TRUE)
 df$sampling_cat <- factor(df$sampling_cat,
-                          levels = c(10, 100, 250, 500, 750, 1000, "original depth"),
+                          levels = c(100, 250, 500, 750, 1000, 10000, "original depth"),
                           ordered = TRUE)
 
-plot2 <- ggplot(df, aes(richness, evenness)) + 
+# take random subset to make image clearer
+set.seed(1997)
+random_df <- sample_n(df, 1000)
+
+plot2 <- ggplot(random_df, aes(richness, evenness)) + 
   geom_point(aes(color=dev_stage, alpha = sampling_cat))+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), 
         axis.line = element_line(colour = "black"))+
   labs(x="richness", y="evenness", 
-       color="read depth", alpha="sampling depth") +
+       color="developmental stage", alpha="sampling depth (k reads)") +
   labs(title = "", tag = "A")+ theme(legend.position = c(.85,.35)) +
-  ylab("evenness (Pielou's measure)")
+  ylab("evenness (Pielou's measure)") + xlim(0, 60)
 plot2
 
 plot3 <- ggplot(df, aes(richness, evenness)) + 
@@ -131,54 +134,73 @@ axis_2 <- axises[2]
 
 
 df_sites$dev_stage <- factor(df_sites$dev_stage,
-                            levels = c("less than 15 months", 
-                                       "15 to 30 months", 
-                                       "older than 30 months"),ordered = TRUE)
-
-
-plot4<-ggplot(df_sites, aes(df_sites$x, df_sites$y, colour=sampling_cat, shape = dev_stage)) +
-  geom_point()+
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.background = element_blank(), axis.line = element_line(colour = "black"))+
-  labs(x="RDA 1, 37.01%", y="RDA 2, 21.67%", 
-                  color="sampling depth", shape = "developmental stage")+ 
-  theme(legend.position = "none")+
-  labs(title = "", tag = "B")
-plot4
-
-# calculating statistics
-
-df_subsampled <- subset(df, sampling_cat != "original depth")
-
-plot5 <- ggplot(df_subsampled, aes(x = sampling_cat, y = shannon, fill= dev_stage)) + 
-  geom_boxplot()
-plot5 <- plot5 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-                 panel.background = element_blank(), 
-                 axis.line = element_line(colour = "black")) +
-  ylab("alpha-diversity (Shannon Index)")+ xlab("sampling depth (k reads)") +
-  labs(title = "", tag = "B") + theme(legend.position = "none") + ylim(0,3)
-plot5
-
-original_data <- subset(df, sampling_cat == "original depth")
-original_data$dev_stage <- factor(original_data$dev_stage,
                              levels = c("less than 15 months", 
                                         "15 to 30 months", 
                                         "older than 30 months"),ordered = TRUE)
 
-plot6 <- ggplot(original_data, aes(x = (read_depth/1000), y = shannon)) +  
+
+#plot4<-ggplot(df_sites, aes(df_sites$x, df_sites$y, colour=sampling_cat, shape = dev_stage)) +
+#  geom_point()+
+#  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+#        panel.background = element_blank(), axis.line = element_line(colour = "black"))+
+#  labs(x="RDA 1, 37.01%", y="RDA 2, 21.67%", 
+#       color="sampling depth", shape = "developmental stage")+ 
+#  theme(legend.position = "none")+
+#  labs(title = "", tag = "B")
+#plot4
+
+# calculating statistics
+
+
+df_subsampled <- subset(df, sampling_cat != "original depth")
+#df$sampling_cat <- as.numeric((df$sampling_cat))
+
+sampling_df <- subset(df, sampling_cat != "original depth")
+sampling_df$dev_stage_factor <- as.factor(as.character(sampling_df$dev_stage))
+
+
+# model to measure difference in slopes between sampling depths among 
+# the developmental stages
+sampling_model <- lmer(shannon ~ read_depth*dev_stage_factor+(1|sampleid), 
+                       data = sampling_df)
+anova(sampling_model)
+summary(sampling_model) # p-values
+
+
+original_data <- subset(df, sampling_cat == "original depth")
+original_data$dev_stage <- factor(original_data$dev_stage,
+                                  levels = c("less than 15 months", 
+                                             "15 to 30 months", 
+                                             "older than 30 months"),ordered = TRUE)
+
+df_subsampled$dev_stage <- as.factor(df_subsampled$dev_stage, ordered = TRUE,
+                                     levels= c("less than 15 months",
+                                               "15 to 30 months",
+                                               "older than 30 months"))
+
+plot5 <- ggplot(df_subsampled, aes(x = log(read_depth), y = (shannon), 
+                                   group = paste(sampling_cat, dev_stage), 
+                                   fill= dev_stage)) + geom_boxplot()
+plot5 <- plot5 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                       panel.background = element_blank(), 
+                       axis.line = element_line(colour = "black")) +
+  ylab("alpha-diversity (Shannon Index)")+ xlab("log sampling depth (k reads)") +
+  labs(title = "", tag = "B") + theme(legend.position = "none") + ylim(0,3)
+plot5
+
+plot6 <- ggplot(original_data, aes(x = log(read_depth), y = shannon)) +  
   geom_point(aes(color = dev_stage))
-plot6 <- plot6 +
-  theme(panel.grid.major = element_blank(), 
-                 panel.grid.minor = element_blank(),
-                 panel.background = element_blank(), 
-                 axis.line.x = element_line(colour = "black"),
-                 axis.text.y = element_blank(),
-                 axis.title.y = element_blank(),
-                 axis.ticks.y = element_blank(), 
-                axis.line.y = element_blank()) + 
+plot6 <- plot6 + theme(panel.grid.major = element_blank(), 
+                       panel.grid.minor = element_blank(),
+                       panel.background = element_blank(), 
+                       axis.line.x = element_line(colour = "black"),
+                       axis.text.y = element_blank(),
+                       axis.title.y = element_blank(),
+                       axis.ticks.y = element_blank(), 
+                       axis.line.y = element_blank()) + 
   theme(legend.position = "none") + 
   ylim(0, 3) +
-  xlab("original read depth")
+  xlab("log original read depth")
 plot6
 
 original_data$read_depth <- original_data$read_depth/1000
@@ -197,8 +219,7 @@ ggplot(alldata, aes(x = (read_depth), y = shannon)) +
         axis.line.y = element_blank()) + 
   theme(legend.position = "none") + 
   ylim(0, 3) +
-  xlab("original read depth")
-
+  xlab("original read depth (k reads")
 
 gl <- list(plot2, plot5, plot6)
 
@@ -226,8 +247,11 @@ IQR((df[df$sampling_cat == "1000" ,]$shannon), na.rm = TRUE)
 mean((df[df$sampling_cat == "original depth",]$shannon), na.rm = TRUE)
 IQR((df[df$sampling_cat == "original depth",]$shannon), na.rm = TRUE)
 
-anova_sampling <- aov(df$shannon~df$sampling_cat)
-summary(anova_sampling)
+
+anova_sampling <- lmer(shannon ~ read_depth+(1|sampleid), 
+                       data = sampling_df)
+anova(anova_sampling)
+summary(anova_sampling) # p-values
 
 anova <- aov(df$shannon~df$sampling_cat*df$dev_stage)
 summary(anova)
@@ -235,8 +259,8 @@ posthoc <- TukeyHSD(anova,conf.level=0.95)
 posthoc <- as.data.frame(posthoc$`df$sampling_cat:df$dev_stage`)
 
 keep_cat_tukey <- scan("/Users/danielle/Documents/thesis/subsampled_analysis/keep_cat_tukey.txt", 
-     what="character", sep=",", 
-     strip.white = TRUE)
+                       what="character", sep=",", 
+                       strip.white = TRUE)
 
 # only keep comparisons we care about and highlight significant p-values
 
@@ -284,31 +308,52 @@ o <- function(x) {
   subset(x, x < quantile(x,probs=c(0.05))[1] | quantile(x,probs=c(0.95))[1] < x)
 }
 
-s1 <- ggplot(df, aes(x = sampling_cat, y = richness, fill= dev_stage)) + 
-  facet_wrap(~dev_stage) +
-  geom_boxplot()
+
+s1 <- ggplot(df_subsampled, aes(x = read_depth, y = richness, 
+                                fill= dev_stage, group = sampling_cat))+
+  geom_boxplot() + facet_wrap(~dev_stage)
 s1 <- s1 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                  panel.background = element_blank(), 
                  axis.line = element_line(colour = "black")) +
   ylab("richness (genus counts)")+ xlab("sampling depth (k reads)")  + 
-  labs(title = "", tag = "A")  
+  labs(title = "", tag = "A")   + 
+  theme(legend.position = "none")
 
 s1 <- s1 + stat_summary(fun.data=f, geom='boxplot')
 s1 <- s1 + stat_summary(fun.y=o, geom='point', aes(colour=factor(dev_stage)))
 s1 + scale_y_log10()
 s1
 
-labs(title = "", tag = "B") + theme(legend.position = "none")+ ylim(0,40)
+
+s1.5 <- ggplot(df, aes(x = log(read_depth), y = shannon)) + 
+  geom_point(aes(color = dev_stage)) + facet_wrap(~dev_stage)
+
+s1.5 <- s1.5 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                     panel.background = element_blank(), 
+                     axis.line = element_line(colour = "black")) +
+  ylab("Alpha diversity (Shannon Index)")+ xlab("sampling depth (k reads)")
+
+s1.5 + scale_y_log10()
+s1.5
+
 
 # broken down by sampling depth
 
-update_geom_defaults("point", list(colour = NULL))
-s2 <- ggplot(df, aes(x = sampling_cat, y = richness, fill= dev_stage)) + 
-  geom_boxplot(outlier.colour = NULL)
+s2 <- ggplot(df_subsampled, aes(x = read_depth, y = richness, 
+                                fill= dev_stage, group = paste(sampling_cat, dev_stage))) + 
+  geom_boxplot(outlier.colour = NULL) 
+
 s2 <- s2 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                  panel.background = element_blank(), 
                  axis.line = element_line(colour = "black")) +
   ylab("richness (genus counts)") + xlab("sampling depth (k reads)")  + 
-  labs(title = "", tag = "B") 
+  labs(title = "", tag = "B") +
+  guides(fill=guide_legend(title="Developmental stage"))
 s2
+
+gl <- list(s1, s2)
+
+lay <- rbind(c(1,1,2,2,2))
+
+grid.arrange(grobs = gl,layout_matrix = lay)
 

@@ -33,31 +33,49 @@ p1 <- p1 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_
 
 p1
 
-# shannon diversity for different ages based on profiling method
-mean(df[df$dev_stage == "less than 15 months",]$shannon, na.rm=TRUE)
-mean(df[df$dev_stage == "15 to 30 months",]$shannon, na.rm=TRUE)
-mean(df[df$dev_stage == "older than 30 months",]$shannon, na.rm=TRUE)
+# shannon diversity for different ages based on profiling method 
+# 16S
 
-# statistics
+df_amp <- df[df$method=="amp",]
+mean(df_amp[df_amp$dev_stage == "less than 15 months",]$shannon, na.rm=TRUE)
+mean(df_amp[df_amp$dev_stage == "15 to 30 months",]$shannon, na.rm=TRUE)
+mean(df_amp[df_amp$dev_stage == "older than 30 months",]$shannon, na.rm=TRUE)
 
 # comparing shannon index by developmental stage
-t.test((df[df$dev_stage == "less than 15 months",]$shannon),
-       df[df$dev_stage == "15 to 30 months",]$shannon)
-t.test((df[df$dev_stage == "15 to 30 months",]$shannon),
-       df[df$dev_stage == "older than 30 months",]$shannon)
-t.test((df[df$dev_stage == "less than 15 months",]$shannon),
-       df[df$dev_stage == "older than 30 months",]$shannon)
+t.test((df_amp[df_amp$dev_stage == "less than 15 months",]$shannon),
+       df_amp[df_amp$dev_stage == "15 to 30 months",]$shannon)
+t.test((df_amp[df_amp$dev_stage == "15 to 30 months",]$shannon),
+       df_amp[df_amp$dev_stage == "older than 30 months",]$shannon)
+t.test((df_amp[df_amp$dev_stage == "less than 15 months",]$shannon),
+       df_amp[df_amp$dev_stage == "older than 30 months",]$shannon)
+# comparing kids older and younger than 30 months 
+t.test((df_amp[df_amp$dev_stage == "less than 15 months" | df_amp$dev_stage =="15 to 30 months",]$shannon),
+       df_amp[df_amp$dev_stage == "older than 30 months",]$shannon)
+
+
+# mgx
+df_mgx <- df[df$method=="mgx",]
+mean(df_mgx[df_mgx$dev_stage == "less than 15 months",]$shannon, na.rm=TRUE)
+mean(df_mgx[df_mgx$dev_stage == "15 to 30 months",]$shannon, na.rm=TRUE)
+mean(df_mgx[df_mgx$dev_stage == "older than 30 months",]$shannon, na.rm=TRUE)
+
+# comparing shannon index by developmental stage
+t.test((df_mgx[df_mgx$dev_stage == "less than 15 months",]$shannon),
+       df_mgx[df_mgx$dev_stage == "15 to 30 months",]$shannon)
+t.test((df_mgx[df_mgx$dev_stage == "15 to 30 months",]$shannon),
+       df_mgx[df_mgx$dev_stage == "older than 30 months",]$shannon)
+t.test((df_mgx[df_mgx$dev_stage == "less than 15 months",]$shannon),
+       df_mgx[df_mgx$dev_stage == "older than 30 months",]$shannon)
 
 # comparing kids older and younger than 30 months 
-t.test((df[df$dev_stage == "less than 15 months" | df$dev_stage =="15 to 30 months",]$shannon),
-       df[df$dev_stage == "older than 30 months",]$shannon)
+t.test((df_mgx[df_mgx$dev_stage == "less than 15 months" | df_mgx$dev_stage =="15 to 30 months",]$shannon),
+       df_mgx[df_mgx$dev_stage == "older than 30 months",]$shannon)
 
 
 anova <- aov(shannon ~ dev_stage, data = df)
 TukeyHSD(anova)
 
 # paired t-test
-
 t.test((df[df$dev_stage == "less than 15 months" & 
              df$method == "amp",]$shannon),
        df[df$dev_stage == "less than 15 months" & 
@@ -69,10 +87,8 @@ t.test((df[df$dev_stage == "15 to 30 months" &
 t.test((df[df$dev_stage == "older than 30 months" & 
              df$method == "amp",]$shannon),
        df[df$dev_stage == "older than 30 months" & 
-            df$method == "mgx",]$shannon,paired=TRUE)
+            df$method == "mgx",]$shannon,paired=TRUE) ## this number is in the paper
 
-anova2 <- aov(shannon ~ dev_stage*method, data = df)
-TukeyHSD(anova2)
 
 # bray curtis dissimilarity for samples
 
