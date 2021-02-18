@@ -209,14 +209,6 @@ mean(bc_method_df[bc_method_df$dev_stage == "15 to 30 months",]$BC_dist,
 mean(bc_method_df[bc_method_df$dev_stage == "older than 30 months",]$BC_dist, 
      na.rm=TRUE)
 
-anova3 <- aov(BC_dist ~ dev_stage, data = bc_method_df)
-TukeyHSD(anova3)
-
-# anova looking at interaction between developmental stage and method
-
-anova4 <- aov(BC_dist ~ dev_stage*method, data = bc_method_df)
-TukeyHSD(anova4)
-
 
 # calculating paired & unpaired Bray Curtis distances for kids of different ages
 ### see above function for arguments

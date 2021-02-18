@@ -58,10 +58,9 @@ df$sampling_cat <- factor(df$sampling_cat,
                           ordered = TRUE)
 
 # take random subset to make image clearer
-set.seed(1997)
-random_df <- sample_n(df, 1000)
 
-plot2 <- ggplot(random_df, aes(richness, evenness)) + 
+
+plot2 <- ggplot(df, aes(richness, evenness)) + 
   geom_point(aes(color=dev_stage, alpha = sampling_cat))+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), 
@@ -248,10 +247,10 @@ mean((df[df$sampling_cat == "original depth",]$shannon), na.rm = TRUE)
 IQR((df[df$sampling_cat == "original depth",]$shannon), na.rm = TRUE)
 
 
-anova_sampling <- lmer(shannon ~ read_depth+(1|sampleid), 
+sampling_model <- lmer(shannon ~ read_depth*dev_stage_factor+(1|sampleid), 
                        data = sampling_df)
-anova(anova_sampling)
-summary(anova_sampling) # p-values
+anova(sampling_model)
+summary(sampling_model) # p-values
 
 anova <- aov(df$shannon~df$sampling_cat*df$dev_stage)
 summary(anova)
@@ -337,7 +336,7 @@ s1.5 + scale_y_log10()
 s1.5
 
 
-# broken down by sampling depth
+ # broken down by sampling depth
 
 s2 <- ggplot(df_subsampled, aes(x = read_depth, y = richness, 
                                 fill= dev_stage, group = paste(sampling_cat, dev_stage))) + 

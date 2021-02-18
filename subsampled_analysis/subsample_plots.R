@@ -71,6 +71,9 @@ plot2 <- ggplot(df, aes(richness, evenness)) +
   ylab("evenness (Pielou's measure)")
 plot2
 
+by(df$shannon, df$sampling_cat, mean) ### reporting this
+
+
 plot3 <- ggplot(df, aes(richness, evenness)) + 
   geom_point(aes(shape=sampling_cat, color = sampleid)) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -217,7 +220,7 @@ summary(sampling_model_young_kids_3) # p-values
 
 
 youngest_kids <- df[df$dev_stage=="less than 15 months",]
-by(youngest_kids$shannon, youngest_kids$sampling_cat, mean)
+by(youngest_kids$shannon, youngest_kids$sampling_cat, mean) ### reporting this
 
 #########
 original_data <- subset(df, sampling_cat == "original depth")
