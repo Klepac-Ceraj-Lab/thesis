@@ -185,12 +185,12 @@ for (bug in unique(intersect_df$taxa)) {
 
 wilcox_df <- data.frame(matrix(ncol = 4, 
                                nrow = length(unique(intersect_df$taxa))))
-colnames(wilcox_df) <- c("taxa","wilcox", "mean_16S", "mean_mgx")
+colnames(wilcox_df) <- c("taxa","wilcox.pvalue", "mean_16S", "mean_mgx")
  wilcox_df$taxa <- unique(intersect_df$taxa)
 
 for (bug in wilcox_df$taxa) {
   # add wilcox test results to dataframe
-  wilcox_df[wilcox_df$taxa == bug,]$wilcox <-(wilcox.test(
+  wilcox_df[wilcox_df$taxa == bug,]$wilcox.pvalue <-(wilcox.test(
     intersect_df$amplicon_abund[intersect_df$taxa==bug], 
     intersect_df$mgx_abund[intersect_df$taxa==bug])$p.value)
   
@@ -203,16 +203,23 @@ for (bug in wilcox_df$taxa) {
 }
 
  wilcox16S <- wilcox_df[wilcox_df$mean_16S > wilcox_df$mean_mgx, ]
- wilcox16S <- (wilcox16S[order(wilcox16S$wilcox,
-                             decreasing = FALSE),][1:20,c(1:4)])
- row.names(wilcox16S) <- NULL
- formattable(wilcox16S)
- 
+ wilcox16S <- (wilcox16S[order(wilcox16S$wilcox.pvalue,
+                             decreasing = FALSE),][,c(1:4)])
+ wilcox16S$diff <- wilcox16S$mean_16S-wilcox16S$mean_mgx
+ wilcox16S$p.adjust <- p.adjust(wilcox16S$wilcox.pvalue, method = "BH", n = length(wilcox16S$wilcox))
+ wilcox16S <- wilcox16S[wilcox16S$p.adjust < 0.05,]
+ wilcox16S$method <- "16S"
+
  wilcoxmgx <- wilcox_df[wilcox_df$mean_mgx > wilcox_df$mean_16S, ]
  wilcoxmgx <- (wilcoxmgx[order(wilcoxmgx$wilcox,
-                               decreasing = FALSE),][1:20,c(1:4)])
- row.names(wilcoxmgx) <- NULL
- formattable(wilcoxmgx)
+                               decreasing = FALSE),][,c(1:4)])
+ wilcoxmgx$diff <- wilcoxmgx$mean_16S-wilcoxmgx$mean_mgx
+ wilcoxmgx$p.adjust <- p.adjust(wilcoxmgx$wilcox, method = "BH", n = length(wilcoxmgx$wilcox))
+ wilcoxmgx <- wilcoxmgx[wilcoxmgx$p.adjust < 0.05,]
+ wilcoxmgx$method <- "mgx"
+ 
+ wilcox_both_methods <- rbind(wilcox16S, wilcoxmgx)
+ write.csv(wilcox_both_methods,'overrepresented_taxa.csv', row.names=FALSE)
  
 
  

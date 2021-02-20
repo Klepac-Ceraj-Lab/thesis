@@ -75,8 +75,7 @@ p1 <- p1 + theme(panel.grid.major = element_blank(),
                  panel.background = element_blank(), 
                  axis.line = element_line(colour = "black")) +
   ylab("primer coverage (%)") + xlab("profiling method") +
-  theme(text = element_text(size=20)) +
-  stat_compare_means()
+  theme(text = element_text(size=20)) 
 p1
 
 # add quartiles and minimum

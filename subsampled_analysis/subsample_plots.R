@@ -7,6 +7,7 @@ library(ggpubr)
 library(lme4)
 library(lmerTest)
 
+
 # index of where bug abundances columns start and end
 start_bugs <- 8
 end_bugs <- 107
@@ -72,7 +73,7 @@ plot2 <- ggplot(df, aes(richness, evenness)) +
 plot2
 
 by(df$shannon, df$sampling_cat, mean) ### reporting this
-
+by(df$shannon, df$sampling_cat, sd) 
 
 plot3 <- ggplot(df, aes(richness, evenness)) + 
   geom_point(aes(shape=sampling_cat, color = sampleid)) +
@@ -167,7 +168,8 @@ sampling_df$dev_stage_factor <- as.factor(as.character(sampling_df$dev_stage))
 sampling_model <- lmer(shannon ~ read_depth*dev_stage_factor+(1|sampleid), 
                        data = sampling_df)
 anova(sampling_model)
-summary(sampling_model) # p-values
+summary(sampling_model)$coefficients # p-values
+write.csv(summary(sampling_model)$coefficients,'subsampling_lm_coef.csv')
 
 young_kids_1 <- sampling_df[sampling_df$dev_stage=="less than 15 months"
                           & sampling_df$read_depth < 300,]
@@ -229,7 +231,7 @@ original_data$dev_stage <- factor(original_data$dev_stage,
                                         "15 to 30 months", 
                                         "older than 30 months"),ordered = TRUE)
 
-df_subsampled$dev_stage <- factor(df_subsampled$dev_stage, ordered=TRUE
+df_subsampled$dev_stage <- factor(df_subsampled$dev_stage, ordered=TRUE,
                                      levels= c("less than 15 months",
                                                "15 to 30 months",
                                                "older than 30 months"))
@@ -325,7 +327,6 @@ posthoc <- posthoc[posthoc$comparisons %in% keep_cat_tukey,]
 posthoc$less_0.05 <- posthoc$`p adj`< 0.05
 posthoc$less_0.005 <- posthoc$`p adj`< 0.005
 
-# write.csv(posthoc,"subsampling_tukey.csv")
 
 # range of shannon diversity by age
 

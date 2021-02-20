@@ -4,6 +4,8 @@ library(gridExtra)
 library(dplyr)
 library(phyloseq)
 library(ggpubr)
+library(lme4)
+library(lmerTest)
 
 # index of where bug abundances columns start and end
 start_bugs <- 7
@@ -103,51 +105,6 @@ abund_table <- df[,start_bugs:end_bugs]
 abund_table<-subset(abund_table,rowSums(abund_table)!=0)
 meta_table <- subset(df,rowSums(df[,start_bugs:end_bugs])!=0)[,1:start_bugs-1]
 
-sol<-rda(abund_table ~ ., data=meta_table)
-scrs<-scores(sol,display=c("sp","wa","lc","bp","cn"))
-df_sites<-data.frame(scrs$sites,meta_table$sampleid, 
-                     meta_table$sampling_cat, meta_table$dev_stage)
-colnames(df_sites)<-c("x,","y","sampleid", "sampling_cat", "dev_stage")
-
-# finding main axes
-axis.expl <- function(mod, axes = 1:2) {
-  
-  if(is.null(mod$CCA)) {
-    sapply(axes, function(i) {
-      100*mod$CA$eig[i]/mod$tot.chi
-    })
-  } else {
-    sapply(axes, function(i) {
-      100*mod$CCA$eig[i]/mod$tot.chi
-    })
-  }
-  
-}
-
-axises <- axis.expl(sol)
-axis_1 <- axises[1]
-axis_2 <- axises[2]
-
-# coloring by dev stage and sampling depth
-
-
-
-df_sites$dev_stage <- factor(df_sites$dev_stage,
-                             levels = c("less than 15 months", 
-                                        "15 to 30 months", 
-                                        "older than 30 months"),ordered = TRUE)
-
-
-#plot4<-ggplot(df_sites, aes(df_sites$x, df_sites$y, colour=sampling_cat, shape = dev_stage)) +
-#  geom_point()+
-#  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-#        panel.background = element_blank(), axis.line = element_line(colour = "black"))+
-#  labs(x="RDA 1, 37.01%", y="RDA 2, 21.67%", 
-#       color="sampling depth", shape = "developmental stage")+ 
-#  theme(legend.position = "none")+
-#  labs(title = "", tag = "B")
-#plot4
-
 # calculating statistics
 
 
@@ -164,6 +121,7 @@ sampling_model <- lmer(shannon ~ read_depth*dev_stage_factor+(1|sampleid),
                        data = sampling_df)
 anova(sampling_model)
 summary(sampling_model) # p-values
+write.csv(summary(sampling_model)$coefficients,'diabimmune_subsampling_lm_coef.csv')
 
 
 original_data <- subset(df, sampling_cat == "original depth")
@@ -228,29 +186,15 @@ lay <- rbind(c(1,1,2,2,3),
 
 grid.arrange(grobs = gl,layout_matrix = lay)
 
-mean((df[df$sampling_cat == "100" ,]$shannon), na.rm = TRUE)
-IQR((df[df$sampling_cat == "100" ,]$shannon), na.rm = TRUE)
-
-mean((df[df$sampling_cat == "250" ,]$shannon), na.rm = TRUE)
-IQR((df[df$sampling_cat == "250" ,]$shannon), na.rm = TRUE)
-
-mean((df[df$sampling_cat == "500" ,]$shannon), na.rm = TRUE)
-IQR((df[df$sampling_cat == "500" ,]$shannon), na.rm = TRUE)
-
-mean((df[df$sampling_cat == "750" ,]$shannon), na.rm = TRUE)
-IQR((df[df$sampling_cat == "750" ,]$shannon), na.rm = TRUE)
-
-mean((df[df$sampling_cat == "1000" ,]$shannon), na.rm = TRUE)
-IQR((df[df$sampling_cat == "1000" ,]$shannon), na.rm = TRUE)
-
-mean((df[df$sampling_cat == "original depth",]$shannon), na.rm = TRUE)
-IQR((df[df$sampling_cat == "original depth",]$shannon), na.rm = TRUE)
-
+by(df$shannon, df$sampling_cat, mean) ### reporting this
 
 sampling_model <- lmer(shannon ~ read_depth*dev_stage_factor+(1|sampleid), 
                        data = sampling_df)
 anova(sampling_model)
 summary(sampling_model) # p-values
+
+write.csv(summary(sampling_model)$coefficients,'diabimmune_subsampling_lm_coef.csv')
+
 
 anova <- aov(df$shannon~df$sampling_cat*df$dev_stage)
 summary(anova)
