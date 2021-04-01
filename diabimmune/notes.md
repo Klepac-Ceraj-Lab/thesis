@@ -41,26 +41,123 @@ title: DIABIMMUNE re-run
 
 ### Running the pipeline
 
-TODO
+Using QIIME.jl
 
-###
+```sh
+ qiimejl --threads 16 -v basic -n pipeline -i rawfastq -o ./ --input-format CasavaOneEightLanelessPerSampleDirFmt --fwd-primer GTGCCAGCMGCCGCGGTAA --rev-primer GGACTACHVGGGTWTCTAAT --fwd-trunc 150 --rev-trunc 150
+```
+
+### Massage dataframe
 
 ```julia
-using CSV, DataFrames
+using CSV, DataFrames, Chain
 
-features = CSV.read("/augusta/staff/kevin/echo/diabimmune_amplicon/pipline/dada2/feature-table.tsv", DataFrame, header=2, delim='\t')
-taxa = CSV.read("/augusta/staff/kevin/echo/diabimmune_amplicon/pipline/taxa/taxonomy.tsv", DataFrame delim='\t')
+
+features = CSV.read("/augusta/staff/kevin/echo/diabimmune_amplicon/pipeline/dada2/feature-table.tsv", DataFrame, header=2, delim='\t')
+taxa = CSV.read("/augusta/staff/kevin/echo/diabimmune_amplicon/pipeline/taxa/taxonomy.tsv", DataFrame, delim='\t')
 
 rename!(features, "#OTU ID"=>"feature")
 rename!(taxa, "Feature ID"=>"feature")
 
 labeled = leftjoin(select(taxa, ["feature", "Taxon"]), features, on="feature")
-select!(labeled, Not("feature"))
+# some columns don't have any taxonomic assigment, remove them
+labeled = labeled[!, [!(eltype(labeled[!, col]) <: Union{Missing, <:Number}) || 
+                        sum(labeled[!, col]) > 0 
+                        for col in names(labeled)]]
 
-CSV.write("/home/kevin/repos/danielle-thesis/diabimmune/karalia_dada2.csv", labeled)
+# convert to relative abundance
+select!(labeled, [:Taxon => (x -> identity(x)), 
+                 [C => c -> c ./ sum(c) for C in names(labeled, r"^G")]...],
+                 renamecols=false)
+any(isnan, [sum(labeled[:, i]) for i in 2:ncol(labeled)-2])
 ```
+
+Now, we need to massage the labels a bit,
+since we have things like `s__Prevotella_sp.` listed as a species,
+and things like ` g__[Ruminococcus]_gnavus_group` not resolved to species.
+
+So we need to consolidate a bit.
+
+```julia
+function taxon(levels::AbstractVector)
+    if length(levels) >= 7
+        sp = levels[7]
+        sp = replace(sp, r"\[|\]"=>"")
+        # species that end with `sp` or don't start with a capital letter
+        # are not acutally classified to the species level
+        if any(pat-> occursin(pat, sp), [r"_sp.$", r"^s__[^A-Z]"])
+            # recurse up to genus
+            return taxon(levels[1:6])
+        else
+            return (name = replace(sp, "s__"=>""), level = :species)
+        end
+    elseif length(levels) == 6
+        ge = levels[6]
+        ge = replace(ge, r"\[|\]"=>"")
+        !occursin(r"^g__[A-Z]", ge) && return (name=join(levels, "; "), level=:family_up)
+        if occursin(r"_group$", ge)
+            m = match(r"g__([A-Z][a-z]+_[a-z]+)_group$", ge)
+            if !isnothing(m)
+                push!(levels, "s__$(m.captures[1])")
+                return taxon(levels)
+            else
+                ge = replace(ge, r"_group$"=>"")
+            end
+        end
+        return (name = split(ge, "_", keepempty=false)[2], level = :genus)
+    else
+        return (name=join(levels, "; "), level=:family_up)
+    end
+end
+
+
+function taxon(longstring::AbstractString)
+    levels = strip.(split(longstring, ';'))
+    return taxon(levels)
+end
+
+labeled = hcat(labeled, DataFrame(taxon.(labeled.Taxon)))
+
+    
+```
+
+
+```julia
+labeled.genus = [row.level in (:genus, :species) ? String(split(row.name, "_")[1]) : "UNCLASSIFIED" for row in eachrow(labeled)]
+labeled.species = [row.level != :species ? "UNCLASSIFIED" : row.name for row in eachrow(labeled)]
+
+ge = @chain labeled begin
+    groupby(:genus)
+    combine([n => sum for n in names(labeled, r"^G")], renamecols=false)
+end
+
+
+sp = @chain labeled begin
+    groupby(:species)
+    combine([n => sum for n in names(labeled, r"^G")], renamecols=false)
+end
+
+CSV.write("/home/kevin/repos/danielle-thesis/diabimmune/karalia_dada2_genera.csv", ge)
+CSV.write("/home/kevin/repos/danielle-thesis/diabimmune/karalia_dada2_species.csv", sp)
+
+```
+
+### Get some statistics
+
+```julia
+using Statistics
+
+sp_totals = sum.(eachcol(filter(:species=> !=("UNCLASSIFIED"), sp)[!, r"^G"]));
+mean(sp_totals)
+median(sp_totals)
+
+ge_totals = sum.(eachcol(filter(:genus => !=("UNCLASSIFIED"), ge)[!, r"^G"]));
+mean(ge_totals)
+median(ge_totals)
+```
+
 ## Metagenomes
------------
+
 
 ### Similar to above, need to parse download
 
