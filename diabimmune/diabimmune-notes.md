@@ -104,7 +104,8 @@ function taxon(levels::AbstractVector)
                 ge = replace(ge, r"_group$"=>"")
             end
         end
-        return (name = split(ge, "_", keepempty=false)[2], level = :genus)
+        return occursin(r"\d", ge) ? (name=join(levels, "; "), level=:family_up) :
+                                     (name = split(ge, "_", keepempty=false)[2], level = :genus)
     else
         return (name=join(levels, "; "), level=:family_up)
     end
