@@ -84,14 +84,26 @@ genus = @chain profilesdf begin
     unstack(:sample, :abundance)
 end
 
-species[!, r"^G\d+"] .= coalesce.(species[!, r"^G\d+"] ./ 100, 0.)
-genus[!, r"^G\d+"] .= coalesce.(genus[!, r"^G\d+"] ./ 100, 0.)
+family = @chain profilesdf begin
+    filter(:taxlevel => ==(:family), _)
+    select(Not(:taxlevel))
+    unique([:taxname, :sample])
+    unstack(:sample, :abundance)
+end
+
+species[!, r"^G"] .= coalesce.(species[!, r"^G"] ./ 100, 0.)
+genus[!, r"^G"] .= coalesce.(genus[!, r"^G"] ./ 100, 0.)
+family[!, r"^G"] .= coalesce.(family[!, r"^G"] ./ 100, 0.)
 
 println.(species.taxname);
 
 #- 
 
 println.(genus.taxname);
+
+#- 
+
+println.(family.taxname);
 
 # Many of these taxon names are not _actually_ classified to the level suggested.
 # eg `Desulfovibrionaceae_unclassified` is listed in genera,
@@ -102,6 +114,7 @@ println.(genus.taxname);
 unclassified_patterns = [
     r"^Candidatus",
     r"_unclassified",
+    r"[Ii]ncertae_[Ss]edis",
     r"_sp_",
     r"_CAG_",
     r"\d+"
@@ -109,23 +122,34 @@ unclassified_patterns = [
 
 @chain species begin
     filter(row-> any(p-> occursin(p, row.taxname), unclassified_patterns), _)
-    DataFrame("taxname"=>["UNCLASSIFIED"], (n => sum(_[!,n]) for n in names(_, r"^G\d+"))...)
+    DataFrame("taxname"=>["UNCLASSIFIED"], (n => sum(_[!,n]) for n in names(_, r"^G"))...)
     append!(species, _)
     filter!(row-> !any(p-> occursin(p, row.taxname), unclassified_patterns), _)
 end
 
-@assert all(col-> isapprox(sum(col), 1, atol=1e-5), eachcol(species[!, r"^G\d+"]))
+@assert all(col-> isapprox(sum(col), 1, atol=1e-5), eachcol(species[!, r"^G"]))
 
 @chain genus begin
     filter(row-> any(p-> occursin(p, row.taxname), unclassified_patterns), _)
-    DataFrame("taxname"=>["UNCLASSIFIED"], (n => sum(_[!,n]) for n in names(_, r"^G\d+"))...)
+    DataFrame("taxname"=>["UNCLASSIFIED"], (n => sum(_[!,n]) for n in names(_, r"^G"))...)
     append!(genus, _)
     filter!(row-> !any(p-> occursin(p, row.taxname), unclassified_patterns), _)
 end
 
-@assert all(col-> isapprox(sum(col), 1, atol=1e-5), eachcol(genus[!, r"^G\d+"]))
+@assert all(col-> isapprox(sum(col), 1, atol=1e-5), eachcol(genus[!, r"^G"]))
 
+
+@chain family begin
+    filter(row-> any(p-> occursin(p, row.taxname), unclassified_patterns), _)
+    DataFrame("taxname"=>["UNCLASSIFIED"], (n => sum(_[!,n]) for n in names(_, r"^G"))...)
+    append!(family, _)
+    filter!(row-> !any(p-> occursin(p, row.taxname), unclassified_patterns), _)
+end
+
+@assert all(col-> isapprox(sum(col), 1, atol=1e-5), eachcol(family[!, r"^G"]))
 #-
+
 
 CSV.write("paper-diabimmune-method-comparison/diabimmune_mgx_species.csv", species)
 CSV.write("paper-diabimmune-method-comparison/diabimmune_mgx_genus.csv", genus)
+CSV.write("paper-diabimmune-method-comparison/diabimmune_mgx_family.csv", family)
