@@ -92,8 +92,14 @@ labeled = hcat(labeled, DataFrame(taxon.(labeled.Taxon)))
 
 
 ```julia
+labeled.family = [row.level in (:genus, :species, :family) ? String(split(row.name, "_")[1]) : "UNCLASSIFIED" for row in eachrow(labeled)]
 labeled.genus = [row.level in (:genus, :species) ? String(split(row.name, "_")[1]) : "UNCLASSIFIED" for row in eachrow(labeled)]
 labeled.species = [row.level != :species ? "UNCLASSIFIED" : row.name for row in eachrow(labeled)]
+
+fa = @chain labeled begin
+    groupby(:family)
+    combine([n => sum for n in names(labeled, r"^[CM]")], renamecols=false)
+end
 
 ge = @chain labeled begin
     groupby(:genus)
@@ -106,6 +112,7 @@ sp = @chain labeled begin
     combine([n => sum for n in names(labeled, r"^[CM]")], renamecols=false)
 end
 
+CSV.write("/home/kevin/repos/danielle-thesis/paper-taxonomic-levels/resonance_dada2_families.csv", fa)
 CSV.write("/home/kevin/repos/danielle-thesis/paper-taxonomic-levels/resonance_dada2_genera.csv", ge)
 CSV.write("/home/kevin/repos/danielle-thesis/paper-taxonomic-levels/resonance_dada2_species.csv", sp)
 
