@@ -1,23 +1,22 @@
----
-author:
-- Kevin Bonham
-- PhD
-title: RESONANCE amplicon updated
----
+# ---
+# author:
+# - Kevin Bonham
+# - PhD
+# title: RESONANCE amplicon updated
+# ---
+#
+# # RESONANCE amplicon updated
+#
+# ## Running the pipeline
+#
+# Using QIIME.jl
+#
+# ```sh
+# qiimejl -n test -i v4v5_seqs -o ./ --threads 16 -v
+# ```
+#
+# ### Massage dataframe
 
-# RESONANCE amplicon updated
-
-## Running the pipeline
-
-Using QIIME.jl
-
-```sh
-qiimejl -n test -i v4v5_seqs -o ./ --threads 16 -v
-```
-
-### Massage dataframe
-
-```julia
 using CSV, DataFrames, Chain
 
 
@@ -38,15 +37,13 @@ select!(labeled, [:Taxon => (x -> identity(x)),
                  [C => c -> c ./ sum(c) for C in names(labeled, r"^[CM]")]...],
                  renamecols=false)
 any(isnan, [sum(labeled[:, i]) for i in 2:ncol(labeled)-2])
-```
 
-Now, we need to massage the labels a bit,
-since we have things like `s__Prevotella_sp.` listed as a species,
-and things like ` g__[Ruminococcus]_gnavus_group` not resolved to species.
+# Now, we need to massage the labels a bit,
+# since we have things like `s__Prevotella_sp.` listed as a species,
+# and things like ` g__[Ruminococcus]_gnavus_group` not resolved to species.
 
-So we need to consolidate a bit.
+# So we need to consolidate a bit.
 
-```julia
 function taxon(levels::AbstractVector)
     if length(levels) >= 7
         sp = levels[7]
@@ -88,10 +85,8 @@ end
 labeled = hcat(labeled, DataFrame(taxon.(labeled.Taxon)))
 
     
-```
 
 
-```julia
 labeled.family = [row.level in (:genus, :species, :family) ? String(split(row.name, "_")[1]) : "UNCLASSIFIED" for row in eachrow(labeled)]
 labeled.genus = [row.level in (:genus, :species) ? String(split(row.name, "_")[1]) : "UNCLASSIFIED" for row in eachrow(labeled)]
 labeled.species = [row.level != :species ? "UNCLASSIFIED" : row.name for row in eachrow(labeled)]
@@ -116,11 +111,9 @@ CSV.write("/home/kevin/repos/danielle-thesis/paper-taxonomic-levels/resonance_da
 CSV.write("/home/kevin/repos/danielle-thesis/paper-taxonomic-levels/resonance_dada2_genera.csv", ge)
 CSV.write("/home/kevin/repos/danielle-thesis/paper-taxonomic-levels/resonance_dada2_species.csv", sp)
 
-```
 
-### Get some statistics
+# ### Get some statistics
 
-```julia
 using Statistics
 
 sp_totals = sum.(eachcol(filter(:species=> !=("UNCLASSIFIED"), sp)[!, r"^[CM]"]));
@@ -130,4 +123,3 @@ median(sp_totals)
 ge_totals = sum.(eachcol(filter(:genus => !=("UNCLASSIFIED"), ge)[!, r"^[CM]"]));
 mean(ge_totals)
 median(ge_totals)
-```

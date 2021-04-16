@@ -1,55 +1,54 @@
----
-author:
-- Kevin Bonham
-- PhD
-title: DIABIMMUNE re-run
----
+# ---
+# author:
+# - Kevin Bonham
+# - PhD
+# title: DIABIMMUNE re-run
+# ---
 
-# DIABIMMUNE re-run
+# # DIABIMMUNE re-run
 
-## 16S files
+# ## 16S files
 
-### Downloading files
+# ### Downloading files
 
-[DIABIMMUNE](https://diabimmune.broadinstitute.org/diabimmune/three-country-cohort/resources/16s-sequence-data)
+# [DIABIMMUNE](https://diabimmune.broadinstitute.org/diabimmune/three-country-cohort/resources/16s-sequence-data)
 
-1.  Command from website doesn\'t work
-    `wget -r -np -nd https://pubs.broadinstitute.org/diabimmune/data/10`
-    1.  This downloads a file called `10` that is actually html
-    2.  The html file has urls inside it
-    3.  I got those out with a series of `sed` commands
+# 1.  Command from website doesn\'t work
+#     `wget -r -np -nd https://pubs.broadinstitute.org/diabimmune/data/10`
+#     1.  This downloads a file called `10` that is actually html
+#     2.  The html file has urls inside it
+#     3.  I got those out with a series of `sed` commands
         
-        ``` {.bash org-language="sh"}
-        sed -E "s/<a href='([^']+)'/\1\n/g" 10 > urls.txt
-        sed -E 's/^.+(https.+)/\1/' urls.txt| grep https > urls1.txt
-        mv urls1.txt urls.txt
-        ```
+#         ``` {.bash org-language="sh"}
+#         sed -E "s/<a href='([^']+)'/\1\n/g" 10 > urls.txt
+#         sed -E 's/^.+(https.+)/\1/' urls.txt| grep https > urls1.txt
+#         mv urls1.txt urls.txt
+#         ```
 
-        Trying to download from these urls, it says they\'ve moved, so
-        need to change `pubs.broadinstitute.org/diabimmune` to
-        `diabimmune.broadinsitute.org/diabimmune`
+#         Trying to download from these urls, it says they\'ve moved, so
+#         need to change `pubs.broadinstitute.org/diabimmune` to
+#         `diabimmune.broadinsitute.org/diabimmune`
 
-        ``` {.bash org-language="sh"}
-        sed -i 's/pubs/diabimmune/' urls.txt
-        ```
+#         ``` {.bash org-language="sh"}
+#         sed -i 's/pubs/diabimmune/' urls.txt
+#         ```
 
-    4.  Then downloaded in parallel with `xargs`
+#     4.  Then downloaded in parallel with `xargs`
 
-        ``` {.bash org-language="sh"}
-        cat urls.txt | xargs -n1 -P8 curl -LO
-        ```
+#         ``` {.bash org-language="sh"}
+#         cat urls.txt | xargs -n1 -P8 curl -LO
+#         ```
 
-### Running the pipeline
+# ### Running the pipeline
 
-Using QIIME.jl
+# Using QIIME.jl
 
-```sh
- qiimejl --threads 16 -v basic -n pipeline -i rawfastq -o ./ --input-format CasavaOneEightLanelessPerSampleDirFmt --fwd-primer GTGCCAGCMGCCGCGGTAA --rev-primer GGACTACHVGGGTWTCTAAT --fwd-trunc 150 --rev-trunc 150
-```
+# ```sh
+#  qiimejl --threads 16 -v basic -n pipeline -i rawfastq -o ./ --input-format CasavaOneEightLanelessPerSampleDirFmt --fwd-primer GTGCCAGCMGCCGCGGTAA --rev-primer GGACTACHVGGGTWTCTAAT --fwd-trunc 150 --rev-trunc 150
+# ```
 
-### Massage dataframe
+# ### Massage dataframe
 
-```julia
 using CSV, DataFrames, Chain
 
 
@@ -70,15 +69,13 @@ select!(labeled, [:Taxon => (x -> identity(x)),
                  [C => c -> c ./ sum(c) for C in names(labeled, r"^G")]...],
                  renamecols=false)
 any(isnan, [sum(labeled[:, i]) for i in 2:ncol(labeled)-2])
-```
 
-Now, we need to massage the labels a bit,
-since we have things like `s__Prevotella_sp.` listed as a species,
-and things like ` g__[Ruminococcus]_gnavus_group` not resolved to species.
+# Now, we need to massage the labels a bit,
+# since we have things like `s__Prevotella_sp.` listed as a species,
+# and things like ` g__[Ruminococcus]_gnavus_group` not resolved to species.
 
-So we need to consolidate a bit.
+# So we need to consolidate a bit.
 
-```julia
 function taxon(levels::AbstractVector)
     if length(levels) >= 7
         sp = levels[7]
@@ -119,11 +116,8 @@ end
 
 labeled = hcat(labeled, DataFrame(taxon.(labeled.Taxon)))
 
-    
-```
+#-
 
-
-```julia
 labeled.family = [row.level in (:genus, :species, :family) ? String(split(row.name, "_")[1]) : "UNCLASSIFIED" for row in eachrow(labeled)]
 labeled.genus = [row.level in (:genus, :species) ? String(split(row.name, "_")[1]) : "UNCLASSIFIED" for row in eachrow(labeled)]
 labeled.species = [row.level != :species ? "UNCLASSIFIED" : row.name for row in eachrow(labeled)]
@@ -148,11 +142,8 @@ CSV.write("/home/kevin/repos/danielle-thesis/diabimmune/karalia_dada2_family.csv
 CSV.write("/home/kevin/repos/danielle-thesis/diabimmune/karalia_dada2_genera.csv", ge)
 CSV.write("/home/kevin/repos/danielle-thesis/diabimmune/karalia_dada2_species.csv", sp)
 
-```
+# ### Get some statistics
 
-### Get some statistics
-
-```julia
 using Statistics
 
 sp_totals = sum.(eachcol(filter(:species=> !=("UNCLASSIFIED"), sp)[!, r"^G"]));
@@ -162,68 +153,65 @@ median(sp_totals)
 ge_totals = sum.(eachcol(filter(:genus => !=("UNCLASSIFIED"), ge)[!, r"^G"]));
 mean(ge_totals)
 median(ge_totals)
-```
 
-## Metagenomes
-
-
-### Similar to above, need to parse download
-
-``` {.shell}
-wget -r -np -nd https://pubs.broadinstitute.org/diabimmune/data/16
-sed -E "s/<a href='([^']+)'/\1\n/g" 16 > urls.txt
-sed -E 's/^.+(https.+)/\1/' urls.txt| grep https > urls1.txt
-mv urls1.txt urls.txt
-cat urls.txt | xargs -n1 -P8 curl -LO
-```
+# ## Metagenomes
 
 
+# ### Similar to above, need to parse download
 
-### Environment setup
+# ``` {.shell}
+# wget -r -np -nd https://pubs.broadinstitute.org/diabimmune/data/16
+# sed -E "s/<a href='([^']+)'/\1\n/g" 16 > urls.txt
+# sed -E 's/^.+(https.+)/\1/' urls.txt| grep https > urls1.txt
+# mv urls1.txt urls.txt
+# cat urls.txt | xargs -n1 -P8 curl -LO
+# ```
 
-#### Load singularity module
+# ### Environment setup
+#
+# #### Load singularity module
+#
+# ``` shell
+# module add singularity/3.7.0
+# ```
 
-``` shell
-module add singularity/3.7.0
-```
+# #### Install biobakery workflows container
 
-#### Install biobakery workflows container
+# ``` bash
+# singularity build biobakery.simg docker://biobakery/workflows
+# ```
 
-``` bash
-singularity build biobakery.simg docker://biobakery/workflows
-```
+# #### Bind paths for access
 
-#### Bind paths for access
+# - By default, singularity only has access to `$HOME`, `/tmp`, and `$PWD`
+# - Can add paths via `--bind /path/on/syestem:/path/in/container`
+# - Can also add to `$SINGULARITY_BINDPATH` env variable
 
-- By default, singularity only has access to `$HOME`, `/tmp`, and `$PWD`
-- Can add paths via `--bind /path/on/syestem:/path/in/container`
-- Can also add to `$SINGULARITY_BINDPATH` env variable
-
-  eg.
+#   eg.
   
-  ``` bash
-  export SINGULARITY_BINDPATH=/pool001/vklepacc:/pool,/nobackup1/vklepacc:/nobackup
-  export BIOBAKERY_WORKFLOWS_DATABASES=/pool/databases
-  ```
+#   ``` bash
+#   export SINGULARITY_BINDPATH=/pool001/vklepacc:/pool,/nobackup1/vklepacc:/nobackup
+#   export BIOBAKERY_WORKFLOWS_DATABASES=/pool/databases
+#   ```
 
-#### Install databases
+# #### Install databases
 
-``` shell
-singularity exec ~/software/biobakery/biobakery.simg kneaddata_database --download human_genome bowtie2 /pool/databases/kneaddata
-singularity exec ~/software/biobakery/biobakery.simg kneaddata_database --download ribosomal_RNA bowtie2 /pool/databases/kneaddata
-singularity exec ~/software/biobakery/biobakery.simg humann_databases --download chocophlan full /pool/databases/humann
-singularity exec ~/software/biobakery/biobakery.simg humann_databases --download uniref uniref90_diamond /pool/databases/humann
-singularity exec ~/software/biobakery/biobakery.simg humann_databases --download utility_mapping full /pool/databases/humann
-```
+# ``` shell
+# singularity exec ~/software/biobakery/biobakery.simg kneaddata_database --download human_genome bowtie2 /pool/databases/kneaddata
+# singularity exec ~/software/biobakery/biobakery.simg kneaddata_database --download ribosomal_RNA bowtie2 /pool/databases/kneaddata
+# singularity exec ~/software/biobakery/biobakery.simg humann_databases --download chocophlan full /pool/databases/humann
+# singularity exec ~/software/biobakery/biobakery.simg humann_databases --download uniref uniref90_diamond /pool/databases/humann
+# singularity exec ~/software/biobakery/biobakery.simg humann_databases --download utility_mapping full /pool/databases/humann
+# ```
 
-NOTE: metaphlan database is already installed. Others are too big
+# NOTE: metaphlan database is already installed. Others are too big
 
-Singularity is unable to update the `humann_config`, so these options need to be manually included in the workflow run
+# Singularity is unable to update the `humann_config`, so these options need to be manually included in the workflow run
 
-#### Run the workflows
+# #### Run the workflows
 
-``` shell
+# ``` shell
 
-```
+# ```
 
 
