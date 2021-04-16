@@ -16,6 +16,7 @@ using DataFrames
 using CSV
 using Microbiome
 using Chain
+using MGXAmplicon: norm_taxon
 
 inpath = "/augusta/echo/analysis/biobakery3/"
 profiles = String[]
@@ -33,28 +34,6 @@ end
 # Now that we have all of the file paths, we will load each file
 # and append it to a DataFrame in tidy format, with columns for
 # `sample`, `taxname`, `taxlevel`, and `abundance`:
-
-const levels = (
-    k = :kingodom,
-    p = :phylum,
-    c = :class,
-    o = :order,
-    f = :family,
-    g = :genus,
-    s = :species,
-    t = :subspecies
-)
-
-function norm_taxon(str)
-    taxsplit = split(str, '|')
-    tax = last(taxsplit)
-    taxletter = Symbol(first(tax))
-    !in(taxletter, keys(levels)) && return (taxlevel = :UNKNOWN, taxname=tax)
-
-    taxlevel = levels[taxletter]
-    taxname = replace(tax, r"[kpcofgs]__"=> "")
-    return (; taxlevel, taxname)
-end
 
 profilesdf = DataFrame()
 
