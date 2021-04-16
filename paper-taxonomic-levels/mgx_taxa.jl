@@ -131,3 +131,15 @@ end
 CSV.write("paper-taxonomic-levels/resonance_mgx_species.csv", species)
 CSV.write("paper-taxonomic-levels/resonance_mgx_genus.csv", genus)
 CSV.write("paper-taxonomic-levels/resonance_mgx_family.csv", family)
+
+#-
+
+samples = unique(profilesdf.sample)
+df = DataFrame(map(samples) do sample
+    m = match(r"^[CM](\d+)-(\d+)[EF]-\d+[A-Z]$", sample)
+    isnothing(m) && @warn "WTF" s
+    (subject, timepoint) = parse.(Int, m.captures)
+    return (; sample, subject, timepoint)
+end)
+
+CSV.write("sampleIDmap.csv", df )

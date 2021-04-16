@@ -17,7 +17,10 @@
 #
 # ### Massage dataframe
 
-using CSV, DataFrames, Chain
+using CSV
+using DataFrames
+using Chain
+using MGXAmplicon: norm_taxon
 
 
 features = CSV.read("/augusta/staff/kevin/echo/echo_amplicon/pipeline/dada2/feature-table.tsv", DataFrame, header=2, delim='\t')
@@ -42,54 +45,11 @@ any(isnan, [sum(labeled[:, i]) for i in 2:ncol(labeled)-2])
 # since we have things like `s__Prevotella_sp.` listed as a species,
 # and things like ` g__[Ruminococcus]_gnavus_group` not resolved to species.
 
-# So we need to consolidate a bit.
+transform!(labeled, :Taxon => ByRow(x-> norm_taxon(x; splitter=';', kind=:amplicon)) => [:taxlevel, :taxname])
 
-function taxon(levels::AbstractVector)
-    if length(levels) >= 7
-        sp = levels[7]
-        sp = replace(sp, r"\[|\]"=>"")
-        # species that end with `sp` or don't start with a capital letter
-        # are not acutally classified to the species level
-        if any(pat-> occursin(pat, sp), [r"_sp.$", r"^s__[^A-Z]"])
-            # recurse up to genus
-            return taxon(levels[1:6])
-        else
-            return (name = replace(sp, "s__"=>""), level = :species)
-        end
-    elseif length(levels) == 6
-        ge = levels[6]
-        ge = replace(ge, r"\[|\]"=>"")
-        !occursin(r"^g__[A-Z]", ge) && return (name=join(levels, "; "), level=:family_up)
-        if occursin(r"_group$", ge)
-            m = match(r"g__([A-Z][a-z]+_[a-z]+)_group$", ge)
-            if !isnothing(m)
-                push!(levels, "s__$(m.captures[1])")
-                return taxon(levels)
-            else
-                ge = replace(ge, r"_group$"=>"")
-            end
-        end
-        return occursin(r"\d", ge) ? (name=join(levels, "; "), level=:family_up) :
-                                     (name = split(ge, "_", keepempty=false)[2], level = :genus)
-    else
-        return (name=join(levels, "; "), level=:family_up)
-    end
-end
-
-
-function taxon(longstring::AbstractString)
-    levels = strip.(split(longstring, ';'))
-    return taxon(levels)
-end
-
-labeled = hcat(labeled, DataFrame(taxon.(labeled.Taxon)))
-
-    
-
-
-labeled.family = [row.level in (:genus, :species, :family) ? String(split(row.name, "_")[1]) : "UNCLASSIFIED" for row in eachrow(labeled)]
-labeled.genus = [row.level in (:genus, :species) ? String(split(row.name, "_")[1]) : "UNCLASSIFIED" for row in eachrow(labeled)]
-labeled.species = [row.level != :species ? "UNCLASSIFIED" : row.name for row in eachrow(labeled)]
+labeled.family = [row.taxlevel in (:genus, :species, :family) ? String(split(row.taxname, ';')[5]) : "UNCLASSIFIED" for row in eachrow(labeled)]
+labeled.genus = [row.taxlevel in (:genus, :species) ? String(split(row.taxname, ';')[6]) : "UNCLASSIFIED" for row in eachrow(labeled)]
+labeled.species = [row.taxlevel != :species ? "UNCLASSIFIED" : String(split(row.taxname, ';')[7]) for row in eachrow(labeled)]
 
 fa = @chain labeled begin
     groupby(:family)
@@ -110,7 +70,6 @@ end
 CSV.write("/home/kevin/repos/danielle-thesis/paper-taxonomic-levels/resonance_dada2_families.csv", fa)
 CSV.write("/home/kevin/repos/danielle-thesis/paper-taxonomic-levels/resonance_dada2_genera.csv", ge)
 CSV.write("/home/kevin/repos/danielle-thesis/paper-taxonomic-levels/resonance_dada2_species.csv", sp)
-
 
 # ### Get some statistics
 
