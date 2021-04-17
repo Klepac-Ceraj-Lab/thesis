@@ -8,27 +8,48 @@ library(reshape2)
 library(gtools)
 library(ape)
 
-setwd("/Users/danielle/Documents/thesis/paper-abundance-tables")
+setwd("/Users/danielle/Documents/thesis/paper-method-comparison")
 
 df <- read.csv("transposed_mgxamp_df.csv", header=TRUE)
 
 total_columns <- ncol(df)
+total_samples <- nrow(df)
+
 abund_table <- as.matrix(df[,5:total_columns])
 bins = seq(min(abund_table), max(abund_table), by=0.01)
 hist(abund_table[abund_table != 0.0], xlim = c(0,0.01), col = 'skyblue3',
      breaks = 10000)
 
-
+# calculating Shannon diversity (alpha-diversity)
 df["shannon"] <- diversity(abund_table, "shannon")
+
+
+# adding developmental stage
+
+df$dev_stage[df$AgeMonths<15 ] <- "less than 15 months"
+df$dev_stage[(df$AgeMonths>=15 & df$AgeMonths <30) ] <- "15 to 30 months"
+df$dev_stage[df$AgeMonths>30 ] <- "older than 30 months"
+
+# finding number of kids in each developmental stage
+length(df$dev_stage[df$AgeMonths<15])/2
+length(df$dev_stage[(df$AgeMonths>=15 & df$AgeMonths <30) ])/2
+length(df$dev_stage[df$AgeMonths>30])/2
+
 df$dev_stage <- factor(df$dev_stage,
                        levels = c("less than 15 months", 
                                   "15 to 30 months", 
                                   "older than 30 months"), ordered = TRUE)
 
-p1 <- ggplot(df, aes(x = dev_stage, y = shannon)) + geom_boxplot(aes(colour = method))
-p1 <- p1 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-                 panel.background = element_blank(), axis.line = element_line(colour = "black")) +
-  ylab("Shannon diversity")+labs(title = "", tag = "A") + xlab("developmental stage") +
+# Plot 1: plot shannon diversity, broken down by age and profiling method
+
+p1 <- ggplot(df, aes(x = dev_stage, y = shannon)) + 
+  geom_boxplot(aes(colour = method))
+p1 <- p1 + theme(panel.grid.major = element_blank(), 
+                 panel.grid.minor = element_blank(),
+                 panel.background = element_blank(), 
+                 axis.line = element_line(colour = "black")) +
+  ylab("Shannon diversity")+labs(title = "", tag = "A") + 
+  xlab("developmental stage") +
   theme(legend.position = "none")
 
 p1
@@ -119,12 +140,12 @@ calc_bc_dist <- function(bug_start, bug_end, dev_stage_arg, method_arg) {
 
 # calculating bray curtis distance amongst samples from same age and profiled 
 # with same method
-amp_under15 <- calc_bc_dist(5, 206, "less than 15 months", "amp")
-mgx_under15 <- calc_bc_dist(5, 206, "less than 15 months", "mgx")
-amp_15to30 <- calc_bc_dist(5, 206, "15 to 30 months", "amp")
-mgx_15to30 <- calc_bc_dist(5, 206, "15 to 30 months", "mgx")
-amp_over30 <- calc_bc_dist(5, 206, "older than 30 months", "amp")
-mgx_over30 <- calc_bc_dist(5, 206, "older than 30 months", "mgx")
+amp_under15 <- calc_bc_dist(5, total_columns, "less than 15 months", "amp")
+mgx_under15 <- calc_bc_dist(5, total_columns, "less than 15 months", "mgx")
+amp_15to30 <- calc_bc_dist(5, total_columns, "15 to 30 months", "amp")
+mgx_15to30 <- calc_bc_dist(5, total_columns, "15 to 30 months", "mgx")
+amp_over30 <- calc_bc_dist(5, total_columns, "older than 30 months", "amp")
+mgx_over30 <- calc_bc_dist(5, total_columns, "older than 30 months", "mgx")
 
 bc_method_df <- rbind(amp_under15, mgx_under15, amp_15to30, mgx_15to30, 
                       amp_over30, mgx_over30)
@@ -153,7 +174,7 @@ p2
 bc_matrix <- as.matrix(vegdist(abund_table, "bray", diag=FALSE,upper=FALSE))
 
 # upper left side of matrix is bc differences for mgx samples: mgx samples
-mgx_bc <- bc_matrix[1:130,1:130]
+mgx_bc <- bc_matrix[1:total_samples/2,1:total_samples/2]
 mgx_bc[lower.tri(mgx_bc)] <- NA
 mgx_bc[mgx_bc == 0.0] <- NA
 mgx_bc_vec <- na.omit(as.vector(mgx_bc))
@@ -161,15 +182,16 @@ mgx_bc_vec
 
 # lower right side of matrix = BC for 16S samples: 16S samples
 
-amp_bc <- bc_matrix[131:260,131:260]
+amp_bc <- bc_matrix[((total_samples/2)+1):total_samples,((total_samples/2)+1):total_samples]
 amp_bc[lower.tri(mgx_bc)] <- NA
 amp_bc[amp_bc == 0.0] <- NA
 amp_bc_vec <- na.omit(as.vector(amp_bc))
 amp_bc_vec
 
 # diagonal of the upper right side of matrix = BC for same samples (16S vs mgx)
-paired_bc_vec <- as.vector(diag(bc_matrix[1:130, 131:260]))
-length(paired_bc_vec) <- length(amp_bc_vec)
+paired_bc_vec <- as.vector(diag(bc_matrix[1:total_samples/2, 
+                                          ((total_samples/2)+1):total_samples]))
+length(paired_bc_vec) <- length(total_samples**2)
 
 # samples with largest differences
 paired_distances <- data.frame(distances = (na.omit(paired_bc_vec)), 
@@ -178,7 +200,9 @@ paired_distances$distances <- as.numeric(paired_distances$distances)
 
 # upper right side of matrix excluding diagonal = BC for different samples 
 # (16S vs mgx)
-unpaired_bc <- diag.remove(bc_matrix[1:130, 131:260], remove.val=NA)
+unpaired_bc <- diag.remove(bc_matrix[1:(total_samples/2), 
+                                     ((total_samples/2)+1):total_samples], 
+                           remove.val=NA)
 unpaired_bc[lower.tri(unpaired_bc)] <- NA
 unpaired_bc_vec <- na.omit(as.vector(unpaired_bc))
 
@@ -250,9 +274,9 @@ calc_paired_BC <- function(bug_start, bug_end, dev_stage_arg){
   return(smartbind(paired_df, unpaired_df))
 }
 
-paired_under15 <- calc_paired_BC(5, 206, "less than 15 months")
-paired_15to30 <- calc_paired_BC(5, 206, "15 to 30 months")
-paired_over30 <- calc_paired_BC(5, 206, "older than 30 months")
+paired_under15 <- calc_paired_BC(5, total_columns, "less than 15 months")
+paired_15to30 <- calc_paired_BC(5, total_columns, "15 to 30 months")
+paired_over30 <- calc_paired_BC(5, total_columns, "older than 30 months")
 
 age_bc_df <- rbind(paired_under15, paired_15to30, paired_over30)
 age_bc_df$dev_stage <- factor(age_bc_df$dev_stage,
@@ -291,7 +315,7 @@ t.test((age_bc_df[age_bc_df$dev_stage == "less than 15 months" &
 # making a RDA plot 
 
 abund_table<-subset(abund_table,rowSums(abund_table)!=0)
-meta_table <- subset(df,rowSums(df[,5:206])!=0)[,1:4]
+meta_table <- df[,c("sampleid","AgeMonths","dev_stage","method")]
 
 ### Pcoa plot
 dist <- vegdist(abund_table,  method = "bray")
@@ -326,7 +350,7 @@ pcoa1 <- pcoa1+geom_point(aes(colour=dev_stage, shape = method,
         panel.grid.minor = element_blank(), 
         axis.line = element_line(colour = "black"),
         axis.text.x = element_blank(), axis.text.y = element_blank()) +
-  theme(legend.position = c(0.9, 0.95),
+  theme(legend.position = c(0.9, 0.99),
         legend.text=element_text(size=10),
         legend.title=element_blank()) + 
   labs(title = "", tag = "D")+
