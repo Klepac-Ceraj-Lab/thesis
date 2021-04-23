@@ -77,6 +77,8 @@ any(isnan, [sum(labeled[:, i]) for i in 2:ncol(labeled)-2])
 # since we have things like `s__Prevotella_sp.` listed as a species,
 # and things like ` g__[Ruminococcus]_gnavus_group` not resolved to species.
 
+println.(filter(row-> occursin("RF39", row.taxname), labeled).taxname);
+
 transform!(labeled, :Taxon => ByRow(x-> norm_taxon(x; splitter=';', kind=:amplicon)) => [:taxlevel, :taxname])
 
 labeled.family = [row.taxlevel in (:genus, :species, :family) ? String(split(row.taxname, ';')[5]) : "UNCLASSIFIED" for row in eachrow(labeled)]
