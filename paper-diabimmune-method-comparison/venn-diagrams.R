@@ -1,20 +1,23 @@
 library(eulerr)
 
-VennDiag1 <- euler(c("16S" = 16, "MGX" = 51,"16S&MGX" = 39))
+# family updated
+VennDiag1 <- euler(c("16S" = 337, "MGX" = 55,"16S&MGX" = 17))
 plot(VennDiag1, counts = TRUE, font=1, cex=1, alpha=0.5,
      fill=c("coral", "cyan", "lightgrey"),
      quantities = list(cex = 5),
      legend = list(labels = c("16S", "MGX")))
 
-VennDiag2 <- euler(c("16S" = 14, "MGX" = 81,"16S&MGX" = 77))
+# genera updated
+VennDiag2 <- euler(c("16S" = 197, "MGX" = 40,"16S&MGX" = 158))
 plot(VennDiag2, counts = TRUE, font=1, cex=1, alpha=0.5,
      fill=c("coral", "cyan", "lightgrey"),
      quantities = list(cex = 5),
      legend = list(labels = c("16S", "MGX")))
 
-VennDiag3 <- euler(c("16S" = 0, "MGX" = 519,"16S&MGX" = 0))
+# species updated
+VennDiag3 <- euler(c("16S" = 127, "MGX" = 383,"16S&MGX" = 128))
 plot(VennDiag3, counts = TRUE, font=1, cex=1, alpha=0.5,
      fill=c("coral", "cyan", "lightgrey"),
      quantities = list(cex = 5),
-     legend = list(labels = c("MGX")))
+     legend = list(labels = c("16S","MGX")))
 
