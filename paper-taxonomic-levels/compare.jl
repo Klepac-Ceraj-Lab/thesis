@@ -29,5 +29,3 @@ summary[3, 3:end] .= unclassified_summary(mgx_genus, :taxname)
 summary[4, 3:end] .= unclassified_summary(dada2_genus, :genus)
 summary[5, 3:end] .= unclassified_summary(mgx_species, :taxname)
 summary[6, 3:end] .= unclassified_summary(dada2_species, :species)
-
-println.(setdiff(replace.(dada2_genus.genus, Ref("g__"=>"")), mgx_genus.taxname))
