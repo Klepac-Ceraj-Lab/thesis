@@ -169,6 +169,12 @@ p2
 
 # statistics
 
+# does microbial community structure vary with profiling method?
+my_dist <- vegdist(abund_table, "bray", diag=FALSE,upper=FALSE)
+permanova <- adonis(my_dist ~ method, 
+                      data=df, 
+                      permutations=9999)
+
 
 # paired vs. unpaired Bray-curtis 
 bc_matrix <- as.matrix(vegdist(abund_table, "bray", diag=FALSE,upper=FALSE))
