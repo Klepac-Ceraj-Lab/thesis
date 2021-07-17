@@ -36,16 +36,21 @@ unique_amp <- scan("amplicon_only.txt", what = 'character', sep = ",")
 present_metaphlan3 <- scan("present_metaphlan3.txt", what = 'character', sep = ",")
 
 tip_labels <- data.frame("taxa" = phylo_drop$tip.label)
-tip_labels['method'] <- NA
+tip_labels['amp'] <- NA
+tip_labels['mgx'] <- NA
 tip_labels['in_db'] <- NA
 
-tip_labels[tip_labels$taxa %in% intersection,]$method <- "both"
+tip_labels[tip_labels$taxa %in% intersection,]$amp <- 1
+tip_labels[tip_labels$taxa %in% intersection,]$mgx <- 1
 tip_labels[tip_labels$taxa %in% intersection,]$in_db <- 0
 
-tip_labels[tip_labels$taxa %in% unique_mgx,]$method <- "amp"
+tip_labels[tip_labels$taxa %in% unique_mgx,]$amp <- -1
+tip_labels[tip_labels$taxa %in% unique_mgx,]$mgx <- 1
 
-tip_labels[tip_labels$taxa %in% unique_amp,]$method <- "mgx"
+tip_labels[tip_labels$taxa %in% unique_amp,]$amp <- 1
+tip_labels[tip_labels$taxa %in% unique_amp,]$mgx <- -1
 tip_labels[(tip_labels$taxa %in% present_metaphlan3 & tip_labels$taxa %in% unique_amp),]$in_db <- 0
+
 # tip_labels[(!tip_labels$taxa %in% present_metaphlan3 & tip_labels$taxa %in% unique_amp),]$in_db <- 1
 # no taxa that were uniquely found by 16S that weren't present in the metaphlan3 database
 
